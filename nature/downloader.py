@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright
 from pylib import log, util
 
 ERROR_RETRY = 5  # Make a few attempts to download a page
-TIMEOUT = 15_000  # Wait this many msec for the page to load
+TIMEOUT = 10_000  # Wait this many msec for the page to load
 
 
 def main():
@@ -42,9 +42,9 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
     if path.exists():
         return
 
-    for attempt in range(retries):
-        if attempt > 0:
-            print(f"Attempt {attempt + 1}")
+    for attempt in range(1, retries + 1):
+        if attempt > 1:
+            print(f"Attempt {attempt}")
 
         try:
             with sync_playwright() as playwright:
@@ -62,7 +62,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
             break
 
         except (TimeoutError, HTTPError, PwTimeoutErrror):
-            time.sleep(2**attempt)
+            time.sleep(attempt * TIMEOUT)
 
 
 def parse_args():
