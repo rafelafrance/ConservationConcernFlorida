@@ -24,7 +24,7 @@ def main():
     targets = util.get_target_taxa(args.target_taxa_csv)
     nature_serve = util.get_nature_serve_taxa(args.nature_serve_json)
 
-    random.shuffle(targets)
+    random.shuffle(targets)  # Silliness... I'm not fooling anyone
 
     for i, target in enumerate(targets, 1):
         print(i, target)
