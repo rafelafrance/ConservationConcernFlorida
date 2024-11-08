@@ -3,7 +3,6 @@
 import argparse
 import csv
 import json
-import random
 import textwrap
 import time
 from pathlib import Path
@@ -28,8 +27,6 @@ def main():
 
     targets = get_target_taxa(args.target_taxa_csv)
     nature_serve = get_nature_serve_taxa(args.nature_serve_json)
-
-    random.shuffle(targets)  # Silliness... I'm not fooling anyone
 
     for i, target in enumerate(targets, 1):
         print(i, target)
@@ -86,8 +83,8 @@ def get_nature_serve_taxa(nature_serve_json: Path) -> dict[str, dict]:
     for item in data:
         nature_serve[item["scientificName"]] = item
         species_global = item.get("speciesGlobal", {})
-        synomnyms = species_global.get("synonyms", [])
-        for syn in synomnyms:
+        synonyms = species_global.get("synonyms", [])
+        for syn in synonyms:
             syn = " ".join(syn.split()[:2])
             nature_serve[syn] = item
 
