@@ -19,6 +19,7 @@ dependencies = [
     "pillow",
     "playwright",
     "regex",
+    "selenium",
     "spacy",
     "tqdm",
 ]
