@@ -13,8 +13,8 @@ from playwright.sync_api import TimeoutError as PwTimeoutError
 from playwright.sync_api import sync_playwright
 from pylib import log
 
-ERROR_RETRY = 5  # Make a few attempts to download a page
-TIMEOUT = 15_000  # Wait this many milliseconds for the page to load
+ERROR_RETRY = 2  # Make a few attempts to download a page
+TIMEOUT = 2  # Wait this many seconds for the page to load
 
 BASE_URL = "https://explorer.natureserve.org"
 
@@ -52,8 +52,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
                 browser = playwright.chromium.launch()
                 ctx = browser.new_context(viewport={"width": 1920, "height": 1080})
                 page = ctx.new_page()
-                page.goto(url)
-                page.wait_for_timeout(TIMEOUT)
+                page.goto(url, wait_until="domcontentloaded")
 
                 with path.open("w", encoding="utf-8") as f:
                     f.write(page.content())
