@@ -5,14 +5,16 @@ import csv
 import re
 import textwrap
 from pathlib import Path
-from pprint import pp
 
+import pandas as pd
 from bs4 import BeautifulSoup
-from pylib import log
-from tqdm import tqdm
+from pylib import log, pipeline
+from pylib.rules.size import Dimension
+
+PIPELINE = pipeline.build()
 
 
-def main(args):
+def main(args):  # noqa: PLR0915
     log.started()
 
     pages = sorted(args.html_dir.glob("*.html"))
@@ -21,51 +23,124 @@ def main(args):
 
     records = []
 
-    for page in tqdm(pages):
+    for page in pages:
+        print(page.stem)
+
         with page.open() as f:
-            page = f.read()
+            text = f.read()
 
-        soup = BeautifulSoup(page, features="lxml")
+        soup = BeautifulSoup(text, features="lxml")
 
-        rec = {}
+        treat = get_treatment(soup)
 
-        treat = soup.find("span", class_="statement").find_all(string=True)
-        treat = {
-            k.strip().lower(): v.strip().lower()
-            for k, v in zip(treat[0::2], treat[1::2], strict=True)
-        }
-        pp(treat)
+        taxon = page.stem.replace("_", " ")
+        taxon = taxon[0].upper() + taxon[1:]
+        rec = {"taxon": taxon}
 
-        rec["plant_height_max"] = plant_height_max(treat)
+        length = plant_height(treat)
+        rec["plant_height_min_cm"] = length.min
+        rec["plant_height_low_cm"] = length.low
+        rec["plant_height_high_cm"] = length.high
+        rec["plant_height_max_cm"] = length.max
+
         rec["leaf_shape"] = leaf_shape(shapes, treat)
-        rec["leaf_length"], rec["leaf_width"], rec["leaf_thickness"] = leaf_size(treat)
-        # rec["seed_length"], rec["seed_width"] = seed_size(treat)
-        rec["fruit_length"], rec["fruit_width"] = fruit_size(treat)
+
+        length, width, thickness = leaf_size(treat)
+        rec["leaf_length_min_cm"] = length.min
+        rec["leaf_length_low_cm"] = length.low
+        rec["leaf_length_high_cm"] = length.high
+        rec["leaf_length_max_cm"] = length.max
+        rec["leaf_width_min_cm"] = width.min
+        rec["leaf_width_low_cm"] = width.low
+        rec["leaf_width_high_cm"] = width.high
+        rec["leaf_width_max_cm"] = width.max
+        rec["leaf_thickness_min_cm"] = thickness.min
+        rec["leaf_thickness_low_cm"] = thickness.low
+        rec["leaf_thickness_high_cm"] = thickness.high
+        rec["leaf_thickness_max_cm"] = thickness.max
+
+        length, width = seed_size(treat)
+        rec["seed_length_min_cm"] = length.min
+        rec["seed_length_low_cm"] = length.low
+        rec["seed_length_high_cm"] = length.high
+        rec["seed_length_max_cm"] = length.max
+        rec["seed_width_min_cm"] = width.min
+        rec["seed_width_low_cm"] = width.low
+        rec["seed_width_high_cm"] = width.high
+        rec["seed_width_max_cm"] = width.max
+
+        length, width = fruit_size(treat)
+        rec["fruit_length_min_cm"] = length.min
+        rec["fruit_length_low_cm"] = length.low
+        rec["fruit_length_high_cm"] = length.high
+        rec["fruit_length_max_cm"] = length.max
+        rec["fruit_width_min_cm"] = width.min
+        rec["fruit_width_low_cm"] = width.low
+        rec["fruit_width_high_cm"] = width.high
+        rec["fruit_width_max_cm"] = width.max
+
         rec["fruit_type"] = fruit_type(fruit_types, treat)
+
         rec["deciduousness"] = deciduousness(duration, treat)
 
-        info = soup.find("div", class_="treatment-info").find_all(string=True)
-        info = [x for i in info if (x := i.strip().lower())][:3]
-        info = {i.split(":")[0].strip(): i.split(":")[1].strip() for i in info}
+        info = get_info(soup)
 
         rec["flowering_time"] = flowering_time(info)
+
         rec["habitat"] = habitat(info)
-        rec["elevation_min"], rec["elevation_max"] = elevation(info)
+
+        elev = elevation(info)
+        rec["elevation_min_m"] = elev.low / 100.0 if elev.low is not None else None
+        rec["elevation_max_m"] = elev.high / 100.0 if elev.high is not None else None
 
         records.append(rec)
-        pp(rec)
-        break
 
-    # pd.DataFrame(records).to_csv(args.out_csv, index=False)
+    pd.DataFrame(records).to_csv(args.out_csv, index=False)
 
     log.finished()
 
 
-def plant_height_max(treat):
-    plant = treat.get("plants", "")
-    heights = re.findall(r"\d+\.?\d*", plant)
-    max_ = max(float(h) for h in heights) if heights else None
-    return max_
+def get_treatment(soup):
+    treat = soup.find("span", class_="statement")
+    if not treat:
+        return {}
+
+    text = str(treat).replace("<i>", "").replace("</i>", "")
+
+    soup2 = BeautifulSoup(text, features="lxml")
+    parts = soup2.find_all(string=True)
+    treat = {
+        k.strip().lower(): v.strip().lower()
+        for k, v in zip(parts[0::2], parts[1::2], strict=True)
+    }
+    return treat
+
+
+def get_info(soup):
+    info = soup.find("div", class_="treatment-info").find_all(string=True)
+    info = [x for i in info if (x := i.strip().lower()) and i.find(":") > -1]
+    info = {i.split(":")[0].strip(): i.split(":")[1].strip() for i in info}
+    return info
+
+
+def get_ent(text: str) -> Dimension:
+    doc = PIPELINE(text)
+    ent = next((e._.trait for e in doc.ents if e.label_ == "size"), None)
+    return ent
+
+
+def get_size(ent, dim: str = "length") -> Dimension:
+    if not ent:
+        return Dimension()
+    dim_ = next((d for d in ent.dims if d.dim == dim), Dimension())
+    return dim_
+
+
+def plant_height(treat):
+    text = treat.get("plants", "")
+    ent = get_ent(text)
+    length = get_size(ent, "length")
+    return length
 
 
 def leaf_shape(shapes, treat):
@@ -75,21 +150,28 @@ def leaf_shape(shapes, treat):
 
 
 def leaf_size(treat):
-    leaf = treat.get("leaf", "")
-    print(leaf)
-    return None, None, None
+    text = treat.get("leaf", "")
+    ent = get_ent(text)
+    length = get_size(ent, "length")
+    width = get_size(ent, "width")
+    thick = get_size(ent, "thickness")
+    return length, width, thick
 
 
 def seed_size(treat):
-    seeds = treat.get("seeds", "")
-    print(seeds)
-    return None, None
+    text = treat.get("seeds", "")
+    ent = get_ent(text)
+    length = get_size(ent, "length")
+    width = get_size(ent, "width")
+    return length, width
 
 
 def fruit_size(treat):
-    fruit = treat.get("fruits", "")
-    print(fruit)
-    return None, None
+    text = treat.get("fruits", "")
+    ent = get_ent(text)
+    length = get_size(ent, "length")
+    width = get_size(ent, "width")
+    return length, width
 
 
 def fruit_type(fruit_types, treat):
@@ -113,9 +195,10 @@ def habitat(info):
 
 
 def elevation(info):
-    elev = info.get("elevation", "")
-    print(elev)
-    return None, None
+    text = info.get("elevation", "")
+    ent = get_ent(text)
+    elev = get_size(ent, "length")
+    return elev
 
 
 def get_terms():

@@ -31,3 +31,6 @@ dim,thick,thickness
 dim,thickness,thickness
 dim,wide,width
 dim,width,width
+cross,x,×
+cross,X,×
+cross,×,×

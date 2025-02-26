@@ -120,17 +120,12 @@ class Range(Base):
     def range_match(cls, ent):
         nums = []
         for token in ent:
-            token._.flag = "range"
             nums += re.findall(r"\d*\.?\d+", token.text)
 
         keys = ent.label_.split(".")[1:]
         kwargs = dict(zip(keys, nums, strict=False))
 
         trait = cls.from_ent(ent, **kwargs)
-
-        # Cache the values in the first token
-        ent[0]._.trait = trait
-        ent[0]._.flag = "range_data"
 
         return trait
 

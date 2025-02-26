@@ -11,7 +11,7 @@ install:
 	./.venv/bin/python -m pip install -U pip setuptools wheel
 	./.venv/bin/python -m pip install git+https://github.com/rafelafrance/traiter.git@master#egg=traiter
 	./.venv/bin/python -m pip install .
-	./.venv/bin/python spacy download en_core_web_md
+	./.venv/bin/python -m spacy download en_core_web_md
 	playwright install
 
 dev:
@@ -20,7 +20,7 @@ dev:
 	./.venv/bin/python -m pip install -U pip setuptools wheel
 	./.venv/bin/python -m pip install -e ../../traiter/traiter
 	./.venv/bin/python -m pip install -e .[dev]
-	./.venv/bin/python spacy download en_core_web_md
+	./.venv/bin/python -m spacy download en_core_web_md
 	playwright install
 	pre-commit install
 

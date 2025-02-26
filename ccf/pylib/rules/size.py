@@ -40,6 +40,7 @@ class Size(Base):
     )
     factors_cm["in"] = 2.54
     lengths: ClassVar[list[str]] = ["metric_length", "imperial_length"]
+    replace: ClassVar[dict[str, str]] = term_util.look_up_table(ALL_CSVS, "replace")
     # ---------------------
 
     dims: list[Dimension] = field(default_factory=list)
@@ -51,6 +52,7 @@ class Size(Base):
     @classmethod
     def pipe(cls, nlp: Language):
         add.term_pipe(nlp, name="size_terms", path=ALL_CSVS)
+        # add.debug_tokens(nlp)  # ##########################################
         add.trait_pipe(
             nlp,
             name="size_patterns",
@@ -71,10 +73,9 @@ class Size(Base):
             ")": {"TEXT": {"IN": t_const.CLOSE}},
             "99.9": {"TEXT": {"REGEX": t_const.FLOAT_TOKEN_RE}},
             "99-99": {"ENT_TYPE": "range"},
-            ",": {"TEXT": {"IN": t_const.COMMA}},
             "cm": {"ENT_TYPE": {"IN": cls.lengths}},
             "dim": {"ENT_TYPE": "dim"},
-            "x": {"LOWER": {"IN": t_const.CROSS + t_const.COMMA}},
+            "x": {"ENT_TYPE": "cross"},
         }
         return [
             Compiler(
@@ -91,34 +92,20 @@ class Size(Base):
         ]
 
     @classmethod
-    def scan_tokens(cls, ent):  # noqa: C901
+    def scan_parts(cls, ent):
         dims = [Dimension()]
 
-        for token in ent:
-            if token._.flag == "range_data":
-                dims[-1].min = token._.trait.min
-                dims[-1].low = token._.trait.low
-                dims[-1].high = token._.trait.high
-                dims[-1].max = token._.trait.max
+        for e in ent.ents:
+            if e.label_ == "range":
+                dims[-1].min = e._.trait.min
+                dims[-1].low = e._.trait.low
+                dims[-1].high = e._.trait.high
+                dims[-1].max = e._.trait.max
 
-            elif token._.term in {"metric_length", "imperial_length"}:
-                if dims[-1].units and token.lower_ == "in":
-                    continue
-                if word := cls.replace.get(token.lower_):
-                    if dims[-1].units is None:
-                        dims[-1].units = word
-                    else:
-                        dims[-1].units += word
+            elif e.label_ in cls.lengths:
+                dims[-1].units = cls.replace.get(e.text.lower(), e.text.lower())
 
-            elif token._.term == "dim":
-                if token.lower_ != "in":
-                    if dims[-1].dim is None:
-                        dims[-1].dim = token.lower_
-                    else:
-                        dims[-1].dim += token.lower_
-                    dims[-1].dim = cls.replace.get(dims[-1].dim, dims[-1].dim)
-
-            elif token.lower_ in cls.cross:
+            elif e.label_ == "cross":
                 dims.append(Dimension())
 
         return dims
@@ -148,29 +135,26 @@ class Size(Base):
                 value = getattr(dim, key)
                 if value is None:
                     continue
+
                 value = float(value)
-                if dim.units == "m" and value > TOO_BIG:
-                    raise reject_match.RejectMatch
-                if value <= TOO_SMALL:
-                    raise reject_match.RejectMatch
+
                 factor = cls.factors_cm.get(dim.units)
                 if factor is None:
                     raise reject_match.RejectMatch
+
                 value = round(value * factor, 3)
                 setattr(dim, key, value)
-
-            # Clear temp data
-            dim.units = None
 
         trait = cls.from_ent(ent, dims=dims)
         return trait
 
     @classmethod
     def size_match(cls, ent):
-        dims = cls.scan_tokens(ent)
+        dims = cls.scan_parts(ent)
         cls.fill_units(dims)
         cls.fill_dimensions(dims)
-        return cls.fill_trait_data(dims, ent)
+        trait = cls.fill_trait_data(dims, ent)
+        return trait
 
 
 @registry.misc("size_match")
