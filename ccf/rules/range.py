@@ -22,6 +22,7 @@ class Range(Base):
 
     @classmethod
     def pipe(cls, nlp: Language):
+        # add.debug_tokens(nlp)  # ##########################################
         add.trait_pipe(nlp, name="range_patterns", compiler=cls.range_patterns())
 
     @classmethod
@@ -30,7 +31,7 @@ class Range(Base):
             "(": {"TEXT": {"IN": t_const.OPEN}},
             ")": {"TEXT": {"IN": t_const.CLOSE}},
             "-": {"TEXT": {"IN": t_const.DASH}, "OP": "+"},
-            "9.9": {"TEXT": {"REGEX": t_const.FLOAT_TOKEN_RE}},
+            "9.9": {"TEXT": {"REGEX": r"\d+(\.\d*)?"}},
             "[+]": {"TEXT": {"IN": t_const.PLUS}},
         }
         return [
@@ -111,7 +112,8 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " ( 9.9 - ) 9.9 - 9.9 ( - 9.9 [+]? ) ",
+                    " ( 9.9 - ) 9.9 - 9.9 [+]? ( - 9.9 [+]? ) ",
+                    " ( 9.9 - ) 9.9 - 9.9 [+]? ( - 9.9 [+]? ) ( - 9.9 [+]? ) ",
                 ],
             ),
         ]

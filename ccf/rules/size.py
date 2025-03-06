@@ -12,23 +12,12 @@ from traiter.pylib.pipes import add, reject_match
 from traiter.pylib.rules import terms as t_terms
 from traiter.pylib.rules.base import Base
 
-TOO_BIG = 100.0
-TOO_SMALL = 0.0
+from ccf.pylib.dimension import Dimension
 
 ALL_CSVS = [
-    Path(__file__).parent / "terms" / "dimension_terms.csv",
+    Path(__file__).parent.parent / "terms" / "dimension_terms.csv",
     Path(t_terms.__file__).parent / "unit_length_terms.csv",
 ]
-
-
-@dataclass(eq=False)
-class Dimension:
-    dim: str = None
-    units: str = None
-    min: float = None
-    low: float = None
-    high: float = None
-    max: float = None
 
 
 @dataclass(eq=False)

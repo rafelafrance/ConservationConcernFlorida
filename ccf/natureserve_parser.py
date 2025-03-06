@@ -70,8 +70,8 @@ def sort_columns(df):
 
 
 def get_states():
-    canada_file = Path(__file__).parent / "pylib" / "terms" / "canada.csv"
-    usa_file = Path(__file__).parent / "pylib" / "terms" / "usa.csv"
+    canada_file = Path(__file__).parent / "pylib" / "rules" / "terms" / "canada.csv"
+    usa_file = Path(__file__).parent / "pylib" / "rules" / "terms" / "usa.csv"
 
     with canada_file.open() as f:
         reader = csv.DictReader(f)

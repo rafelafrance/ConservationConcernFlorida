@@ -1,0 +1,138 @@
+label,pattern,replace
+axis,leaf-axes,leaf-axis
+axis,leaf-axis,leaf-axis
+axis,lf-axes,leaf-axis
+axis,lf-axis,leaf-axis
+bract,leaf-bracteate,leaf-bracteate
+leaf,blade,leaf
+leaf,blades,leaf
+leaf,leaf blade,leaf
+leaf,leaf blades,leaf
+leaf,leaf,leaf
+leaf,leaved,leaf
+leaf,leaves,leaf
+leaf,lf,leaf
+leaf,lvd,leaved
+leaf,lvs,leaf
+leaf,shade leaf,leaf
+leaf,shade leaves,leaf
+leaf,shade-leaf,leaf
+leaf,shade-leaves,leaf
+leaf,sun leaf,leaf
+leaf,sun leaves,leaf
+leaf,sun-leaf,leaf
+leaf,sun-leaves,leaf
+leaflet,leaflet blade,leaflet
+leaflet,leaflet blades,leaflet
+leaflet,leaflet,leaflet
+leaflet,leaflet-pair,leaflet
+leaflet,leaflet-pairs,leaflet
+leaflet,leaflets,leaflet
+leaflet,lft,leaflet
+leaflet,lfts,leaflet
+ligule,ligule,ligule
+petiole,petiole blade,petiole
+petiole,petiole blades,petiole
+petiole,petiole,petiole
+petiole,petioles,petiole
+petiole,petiolule,petiolule
+petiole,petiolules,petiolule
+petiole,phyllode,phyllode
+petiole,phyllodes,phyllode
+sheath,sheath,sheath
+sheath,sheaves,sheaves
+stalk,leaf-stalk,leaf-stalk
+stalk,leaf-stalks,leaf-stalk
+stalk,leafstalk,leaf-stalk
+stalk,leafstalks,leaf-stalk
+stalk,lf-stk,leaf-stalk
+stalk,lf-stks,leaf-stalk
+stalk,lfstk,leaf-stalk
+stalk,lfstks,leaf-stalk
+stalk,pulvini,pulvini
+stalk,pulvinule,pulvinule
+stalk,pulvinules,pulvinule
+stalk,pulvinus,pulvinus
+venation,arbuscularis,arbuscular
+venation,brochidodromous,brochidodromous
+venation,camptodromous,camptodromous
+venation,campylodrom,campylodrom
+venation,campylodromous,campylodrom
+venation,canalicululate,channelled
+venation,channelled,channelled
+venation,cladodromous,cladodromous
+venation,collimate,collimate
+venation,collimatus,collimate
+venation,conglutinate,conglutinate
+venation,conglutinatus,conglutinate
+venation,craspedodromous,craspedodromous
+venation,dichotomous,dichotomous
+venation,eucamptodromous,eucamptodromous
+venation,fan veined,palmate
+venation,fan-veined,palmate
+venation,feather veined,feather-veined
+venation,feather-veined,feather-veined
+venation,flabellate,flabellate
+venation,flabellatus,flabellate
+venation,guttered,guttered
+venation,hyphodromous,hyphodromous
+venation,imperfect basal,imperfect basal
+venation,imperfect reticulate,imperfect reticulate
+venation,impressed,impressed
+venation,midrib,midrib
+venation,midribs,midrib
+venation,midvein,midrib
+venation,midveins,midrib
+venation,multicostate convergent,multicostate convergent
+venation,multicostate divergent,multicostate divergent
+venation,multicostate parallel convergent,multicostate parallel convergent
+venation,multicostate parallel divergent,multicostate parallel divergent
+venation,multicostate parallel,multicostate parallel
+venation,netted,netted
+venation,palinactodrom,palinactodrom
+venation,palinactodromous,palinactodrom
+venation,palmate parallel,palmate-parallel
+venation,palmate,palmate
+venation,palmate-netted,palmate
+venation,palmate-parallel,palmate-parallel
+venation,palmate-veined,palmate
+venation,palmately netted,palmate
+venation,palmately veined,palmate
+venation,palmatus,palmate
+venation,parallel,parallel
+venation,parallel-nerved,parallelodromous
+venation,parallel-ribbed,parallelodromous
+venation,parallel-veined,parallelodromous
+venation,parallelodrom,parallelodrom
+venation,parallelodromous,parallelodrom
+venation,penni parallel,parallelodromous
+venation,penni-parallel,parallelodromous
+venation,penninerved,penninerved
+venation,penniribbed,penniribbed
+venation,penniveined,penniveined
+venation,pinnate netted,pinnate-netted
+venation,pinnate parallel,pinnate parallel
+venation,pinnate-netted,pinnate-netted
+venation,plinerved,plinervy
+venation,plinervy,plinervy
+venation,reticulate,reticulate
+venation,rib,rib
+venation,ribbed,rib
+venation,ribs,rib
+venation,scalariform,scalariform
+venation,striate,striate
+venation,subflabellate,subflabellate
+venation,submarginal,submarginal
+venation,ternate-netted,ternate-netted
+venation,ternately,ternate-netted
+venation,trinerved,trinerved
+venation,unicostate parallel,unicostate parallel
+venation,unicostate reticulate,unicostate reticulate
+venation,uninerved,uninervous
+venation,uninervous,uninervous
+venation,vein,vein
+venation,veined,veined
+venation,veinless,veinless
+venation,veinlet ,veinlet
+venation,veins,vein
+venation,venation,vein

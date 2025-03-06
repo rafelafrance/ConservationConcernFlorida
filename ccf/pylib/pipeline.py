@@ -1,11 +1,12 @@
 import spacy
 from traiter.pylib.pipes import extensions, tokenizer
 
-from ccf.pylib.rules.range import Range
-from ccf.pylib.rules.size import Size
+from ccf.rules.leaf_size import LeafSize
+from ccf.rules.range import Range
+from ccf.rules.size import Size
 
 
-def build():
+def build(part=""):
     extensions.add_extensions()
 
     nlp = spacy.load("en_core_web_md", exclude=["ner"])
@@ -14,5 +15,8 @@ def build():
 
     Range.pipe(nlp)
     Size.pipe(nlp)
+
+    if part == "leaf":
+        LeafSize.pipe(nlp)
 
     return nlp

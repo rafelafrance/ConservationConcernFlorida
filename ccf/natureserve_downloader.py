@@ -73,18 +73,17 @@ def get_target_taxa(target_taxa_csv: Path) -> list[str]:
 
 
 def get_nature_serve_taxa(nature_serve_json: Path) -> dict[str, dict]:
-    """Get a dict of nature serve taxa/synonyms and nature_serve records."""
     with nature_serve_json.open() as f:
         data = json.load(f)
 
     nature_serve = {}
     for item in data:
         nature_serve[item["scientificName"]] = item
-        species_global = item.get("speciesGlobal", {})
-        synonyms = species_global.get("synonyms", [])
-        for syn in synonyms:
-            syn = " ".join(syn.split()[:2])
-            nature_serve[syn] = item
+        # species_global = item.get("speciesGlobal", {})
+        # synonyms = species_global.get("synonyms", [])
+        # for syn in synonyms:
+        #     syn = " ".join(syn.split()[:2])
+        #     nature_serve[syn] = item
 
     return nature_serve
 
