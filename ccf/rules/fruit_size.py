@@ -13,12 +13,12 @@ from ccf.rules.base import Base
 
 
 @dataclass(eq=False)
-class LeafSize(Base):
+class FruitSize(Base):
     # Class vars ----------
-    terms = (Path(__file__).parent / "terms" / "leaf_terms.csv",)
+    terms = (Path(__file__).parent / "terms" / "fruit_terms.csv",)
     parts: ClassVar[list[str]] = term_util.get_labels(terms)
-    other: ClassVar[list[str]] = [t for t in parts if t != "leaf"]
-    leaf: ClassVar[str] = "leaf"
+    other: ClassVar[list[str]] = [t for t in parts if t != "fruit"]
+    fruit: ClassVar[str] = "fruit"
     # ---------------------
 
     part: str | None = None
@@ -27,45 +27,45 @@ class LeafSize(Base):
 
     @classmethod
     def pipe(cls, nlp: Language):
-        add.term_pipe(nlp, name="leaf_size_terms", path=cls.terms)
+        add.term_pipe(nlp, name="fruit_size_terms", path=cls.terms)
         # add.debug_tokens(nlp)  # ##########################################
         add.trait_pipe(
             nlp,
-            name="leaf_size_patterns",
-            compiler=cls.leaf_size_patterns(),
+            name="fruit_size_patterns",
+            compiler=cls.fruit_size_patterns(),
             overwrite=["size"],
         )
 
-        add.cleanup_pipe(nlp, name="leaf_size_cleanup")
+        add.cleanup_pipe(nlp, name="fruit_size_cleanup")
 
     @property
     def dimensions(self):
         return tuple(d.dim for d in self.dims)
 
     @classmethod
-    def leaf_size_patterns(cls):
+    def fruit_size_patterns(cls):
         return [
             Compiler(
-                label="leaf_size",
-                keep="leaf_size",
-                on_match="leaf_size_match",
+                label="fruit_size",
+                keep="fruit_size",
+                on_match="fruit_size_match",
                 decoder={
-                    "leaf": {"ENT_TYPE": "leaf"},
+                    "fruit": {"ENT_TYPE": "fruit"},
                     "other": {"ENT_TYPE": {"IN": cls.other}},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "leaf* size+",
+                    "fruit* size+",
                     "other* size+",
                 ],
             ),
         ]
 
     @classmethod
-    def leaf_size_match(cls, ent):
+    def fruit_size_match(cls, ent):
         dims = []
         units = ""
-        part = "leaf"
+        part = "fruit"
 
         for e in ent.ents:
             if e.label_ == "size":
@@ -79,6 +79,6 @@ class LeafSize(Base):
         return trait
 
 
-@registry.misc("leaf_size_match")
-def leaf_size_match(ent):
-    return LeafSize.leaf_size_match(ent)
+@registry.misc("fruit_size_match")
+def fruit_size_match(ent):
+    return FruitSize.fruit_size_match(ent)

@@ -136,3 +136,9 @@ venation,veinless,veinless
 venation,veinlet ,veinlet
 venation,veins,vein
 venation,venation,vein
+leaf_duration,deciduous
+leaf_duration,evergreen
+leaf_duration,semi-deciduous
+leaf_duration,semi-evergreen
+leaf_duration,semideciduous
+leaf_duration,semievergreen

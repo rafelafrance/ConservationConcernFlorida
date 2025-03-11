@@ -15,7 +15,7 @@ from traiter.pylib.rules.base import Base
 from ccf.pylib.dimension import Dimension
 
 ALL_CSVS = [
-    Path(__file__).parent.parent / "terms" / "dimension_terms.csv",
+    Path(__file__).parent / "terms" / "dimension_terms.csv",
     Path(t_terms.__file__).parent / "unit_length_terms.csv",
 ]
 

@@ -11,7 +11,7 @@ from pylib import log
 
 
 class ExtractInfo(dspy.Signature):
-    """Extract structured information from Flora or North America treatments."""
+    """Analyze species descriptions and extract trait information."""
 
     text: str = dspy.InputField()
     question: str = dspy.InputField()
@@ -29,21 +29,26 @@ def main(args):
         """ What is the plant size,
             leaf shape, leaf length, leaf width, leaf thickness,
             seed length, seed width,
-            fruit length, fruit width,
+            fruit type, fruit length, fruit width,
             deciduousness?
-            If it is not mentioned return an empty string.
+            If it is not mentioned return an empty value.
             """,
-        """ What is the fruit type?
-            A fruit type is like (berry, pome, stone, achene, capsule, caryopsis,
-                cypsela, drupe, follicle, hesperidia, legume, loment nut pepo, samara,
-                schizocarp, silicle, siliqua, utricle).
-            If it is not mentioned return an empty string.
-            """,
+        # """ What is the fruit type?
+        #     A fruit type is like (berry, pome, stone, achene, capsule, caryopsis,
+        #         cypsela, drupe, follicle, hesperidia, legume, loment nut pepo, samara,
+        #         schizocarp, silicle, siliqua, utricle).
+        #     If it is not mentioned return an empty string.
+        #     """,
     ]
+
+    test = argparse.Namespace()
+    test.aa = 10
+    print(test)
 
     module = dspy.Predict(ExtractInfo)
 
     for page in pages[:10]:
+        print("=" * 80)
         print(page.stem)
 
         with page.open() as f:
@@ -57,7 +62,9 @@ def main(args):
         for quest in questions:
             dspy.configure(lm=lm)
             reply = module(text=treatment, question=quest)
+            print(page.stem)
             pp(reply.entities)
+            print()
 
     log.finished()
 
@@ -78,19 +85,18 @@ def parse_args():
 
     arg_parser.add_argument(
         "--model",
-        default="ollama_chat/deepseek-r1:14b",
-        help="""Use this LLM model.""",
+        default="ollama_chat/qwq",
+        help="""Use this LLM model. (default: %(default)s)""",
     )
 
     arg_parser.add_argument(
         "--api-base",
         default="http://localhost:11434",
-        help="""URL for the LM model.""",
+        help="""URL for the LM model. (default: %(default)s)""",
     )
 
     arg_parser.add_argument(
         "--api-key",
-        default="",
         help="""Key for the LM model.""",
     )
 

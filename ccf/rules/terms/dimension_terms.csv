@@ -1,0 +1,38 @@
+label,pattern,replace
+dimension,broad,broad
+dimension,broader,broad
+dimension,d.b.h,dbh
+dimension,d.b.h.,dbh
+dimension,dbh,dbh
+dimension,dia,diameter
+dimension,dia.,diameter
+dimension,diam,diameter
+dimension,diam.,diameter
+dimension,diameter at breast height,dbh
+dimension,diameter at breast height.,dbh
+dimension,diameter breast height,dbh
+dimension,diameter breast height.,dbh
+dimension,diameter,diameter
+dimension,diameter.,diameter
+dimension,diameters,diameter
+dimension,diameters.,diameter
+dimension,height,height
+dimension,high,height
+dimension,in dia,diameter
+dimension,in diam,diameter
+dimension,in diameter,diameter
+dimension,in height,height
+dimension,length,length
+dimension,long,length
+dimension,longo,length
+dimension,radius,radius
+dimension,size,size
+dimension,sized,size
+dimension,tall,height
+dimension,thick,thickness
+dimension,thickness,thickness
+dimension,wide,width
+dimension,width,width
+cross,x,×
+cross,X,×
+cross,×,×
