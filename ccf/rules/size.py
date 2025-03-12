@@ -6,9 +6,8 @@ from spacy import registry
 from spacy.language import Language
 from traiter.pylib import const as t_const
 from traiter.pylib import term_util
-from traiter.pylib.darwin_core import DarwinCore
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add, reject_match
+from traiter.pylib.pipes import add
 from traiter.pylib.rules import terms as t_terms
 from traiter.pylib.rules.base import Base
 
@@ -33,10 +32,6 @@ class Size(Base):
     # ---------------------
 
     dims: list[Dimension] = field(default_factory=list)
-    units: str = "cm"
-
-    def to_dwc(self, dwc) -> DarwinCore:
-        ...
 
     @classmethod
     def pipe(cls, nlp: Language):
@@ -80,9 +75,23 @@ class Size(Base):
             ),
         ]
 
+    @staticmethod
+    def get_indices(ent, start, end) -> tuple[int, int]:
+        first, last = ent[0], ent[-1]
+
+        if start == -1 or first.idx < start:
+            start = first.idx
+
+        fin = last.idx + len(last)
+        if end == -1 or fin > end:
+            end = fin
+
+        return start, end
+
     @classmethod
     def scan_parts(cls, ent):
         dims = [Dimension()]
+        start, end = -1, -1
 
         for e in ent.ents:
             if e.label_ == "range":
@@ -91,11 +100,20 @@ class Size(Base):
                 dims[-1].high = e._.trait.high
                 dims[-1].max = e._.trait.max
 
+                start, end = cls.get_indices(e, start, end)
+                dims[-1].start = start
+                dims[-1].end = end
+
             elif e.label_ in cls.lengths:
                 dims[-1].units = cls.replace.get(e.text.lower(), e.text.lower())
 
+                start, end = cls.get_indices(e, start, end)
+                dims[-1].start = start
+                dims[-1].end = end
+
             elif e.label_ == "cross":
                 dims.append(Dimension())
+                start, end = -1, -1
 
         return dims
 
@@ -127,11 +145,11 @@ class Size(Base):
 
                 value = float(value)
 
-                factor = cls.factors_cm.get(dim.units)
-                if factor is None:
-                    raise reject_match.RejectMatch
+                # factor = cls.factors_cm.get(dim.units)
+                # if factor is None:
+                #     raise reject_match.RejectMatch
 
-                value = round(value * factor, 3)
+                # value = round(value * factor, 3)
                 setattr(dim, key, value)
 
         trait = cls.from_ent(ent, dims=dims)
@@ -144,6 +162,19 @@ class Size(Base):
         cls.fill_dimensions(dims)
         trait = cls.fill_trait_data(dims, ent)
         return trait
+
+    @classmethod
+    def convert_units_to_cm(cls, size_trait):
+        for dim in size_trait.dims:
+            for key in ("min", "low", "high", "max"):
+                value = getattr(dim, key)
+                if value is None:
+                    continue
+
+                factor = cls.factors_cm.get(dim.units)
+
+                value = round(value * factor, 3)
+                setattr(dim, key, value)
 
 
 @registry.misc("size_match")

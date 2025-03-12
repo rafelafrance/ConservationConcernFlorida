@@ -14,14 +14,15 @@ class TestFruitSize(unittest.TestCase):
                 Size(
                     start=39,
                     end=49,
-                    units="cm",
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
-                            low=0.2,
-                            high=0.3,
-                            max=0.4,
+                            low=2.0,
+                            high=3.0,
+                            max=4.0,
+                            start=39,
+                            end=49,
                         )
                     ],
                 ),
@@ -36,14 +37,15 @@ class TestFruitSize(unittest.TestCase):
                     start=0,
                     end=17,
                     part="fruit",
-                    units="cm",
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
-                            low=0.2,
-                            high=0.3,
-                            max=0.4,
+                            low=2.0,
+                            high=3.0,
+                            max=4.0,
+                            start=7,
+                            end=17,
                         )
                     ],
                 ),
@@ -58,14 +60,15 @@ class TestFruitSize(unittest.TestCase):
                     start=0,
                     end=16,
                     part="beak",
-                    units="cm",
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
-                            low=0.2,
-                            high=0.3,
-                            max=0.4,
+                            low=2.0,
+                            high=3.0,
+                            max=4.0,
+                            start=6,
+                            end=16,
                         )
                     ],
                 ),

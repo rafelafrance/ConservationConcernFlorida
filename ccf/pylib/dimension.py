@@ -3,9 +3,11 @@ from dataclasses import dataclass
 
 @dataclass(eq=False)
 class Dimension:
-    dim: str | None = None
-    units: str | None = None
-    min: float | None = None
-    low: float | None = None
-    high: float | None = None
-    max: float | None = None
+    dim: str = None
+    units: str = None
+    min: float = None
+    low: float = None
+    high: float = None
+    max: float = None
+    start: int = None
+    end: int = None

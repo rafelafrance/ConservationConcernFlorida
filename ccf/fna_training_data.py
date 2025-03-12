@@ -4,6 +4,7 @@ import argparse
 import csv
 import re
 import textwrap
+from collections import defaultdict
 from pathlib import Path
 
 import ftfy
@@ -31,13 +32,22 @@ def main(args):
 
     records = []
 
+    all_keys = defaultdict(list)
+
     for page in pages:
+        print(page.stem)
+
         with page.open() as f:
             text = f.read()
 
         soup = BeautifulSoup(text, features="lxml")
 
         treat = get_treatment(soup)
+
+        if args.print_keys:
+            for key, value in treat.items():
+                all_keys[key].append(value)
+            continue
 
         taxon = page.stem.replace("_", " ")
         taxon = taxon[0].upper() + taxon[1:]
@@ -320,6 +330,12 @@ def parse_args():
         type=Path,
         metavar="PATH",
         help="""Output the results to this CSV file.""",
+    )
+
+    arg_parser.add_argument(
+        "--print-keys",
+        action="store_true",
+        help="""Print a list of treatment keys and exit.""",
     )
 
     args = arg_parser.parse_args()

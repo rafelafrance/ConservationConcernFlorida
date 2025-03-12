@@ -14,14 +14,15 @@ class TestSeedSize(unittest.TestCase):
                     start=0,
                     end=16,
                     part="seed",
-                    units="cm",
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
-                            low=0.2,
-                            high=0.3,
-                            max=0.4,
+                            low=2,
+                            high=3,
+                            max=4,
+                            start=6,
+                            end=16,
                         )
                     ],
                 ),
@@ -36,14 +37,15 @@ class TestSeedSize(unittest.TestCase):
                     start=0,
                     end=15,
                     part="hilum",
-                    units="cm",
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
-                            low=0.2,
-                            high=0.3,
-                            max=0.4,
+                            low=2,
+                            high=3,
+                            max=4,
+                            start=5,
+                            end=15,
                         )
                     ],
                 ),

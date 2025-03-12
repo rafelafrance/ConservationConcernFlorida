@@ -11,10 +11,18 @@ class TestSize(unittest.TestCase):
             parse("""Elevation: 0–3600 m"""),
             [
                 Size(
-                    dims=[Dimension(dim="length", low=0, high=360000, units="m")],
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            low=0,
+                            high=3600,
+                            units="m",
+                            start=11,
+                            end=19,
+                        )
+                    ],
                     start=11,
                     end=19,
-                    units="cm",
                 ),
             ],
         )
@@ -27,12 +35,18 @@ class TestSize(unittest.TestCase):
                 Size(
                     dims=[
                         Dimension(
-                            dim="length", min=10, low=30, high=60, max=180, units="cm"
+                            dim="length",
+                            min=10,
+                            low=30,
+                            high=60,
+                            max=180,
+                            units="cm",
+                            start=0,
+                            end=26,
                         )
                     ],
                     start=0,
                     end=26,
-                    units="cm",
                 ),
             ],
         )
@@ -45,12 +59,18 @@ class TestSize(unittest.TestCase):
                 Size(
                     dims=[
                         Dimension(
-                            dim="length", min=5, low=10, high=30, max=80, units="cm"
+                            dim="length",
+                            min=5,
+                            low=10,
+                            high=30,
+                            max=80,
+                            units="cm",
+                            start=0,
+                            end=18,
                         )
                     ],
                     start=0,
                     end=18,
-                    units="cm",
                 ),
             ],
         )

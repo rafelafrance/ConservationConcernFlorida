@@ -20,7 +20,6 @@ class LeafSize(Base):
     # ---------------------
 
     part: str = None
-    units: str = None
     dims: list[Dimension] = field(default_factory=list)
 
     @classmethod
@@ -62,18 +61,17 @@ class LeafSize(Base):
     @classmethod
     def leaf_size_match(cls, ent):
         dims = []
-        units, part = "", ""
+        part = ""
 
         for e in ent.ents:
             if e.label_ == "size":
                 dims = e._.trait.dims
-                units = e._.trait.units
 
             elif e.label_ in ("leaf_part", "leaf_term"):
                 text = e.text.lower()
                 part = cls.replace.get(text, text)
 
-        trait = cls.from_ent(ent, part=part, dims=dims, units=units)
+        trait = cls.from_ent(ent, part=part, dims=dims)
         return trait
 
 
