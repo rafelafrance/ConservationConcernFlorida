@@ -15,10 +15,8 @@ from ccf.rules.base import Base
 @dataclass(eq=False)
 class SeedSize(Base):
     # Class vars ----------
-    terms = (Path(__file__).parent / "terms" / "seed_terms.csv",)
-    parts: ClassVar[list[str]] = term_util.get_labels(terms)
-    other: ClassVar[list[str]] = [t for t in parts if t != "seed"]
-    seed: ClassVar[str] = "seed"
+    terms: ClassVar[Path] = Path(__file__).parent / "terms" / "seed_terms.csv"
+    replace: ClassVar[dict[str, str]] = term_util.look_up_table(terms, "replace")
     # ---------------------
 
     part: str | None = None
@@ -50,13 +48,13 @@ class SeedSize(Base):
                 keep="seed_size",
                 on_match="seed_size_match",
                 decoder={
-                    "seed": {"ENT_TYPE": "seed"},
-                    "other": {"ENT_TYPE": {"IN": cls.other}},
+                    "seed": {"ENT_TYPE": "seed_term"},
+                    "part": {"ENT_TYPE": "seed_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "seed* size+",
-                    "other* size+",
+                    "seed+ size+",
+                    "part+ size+",
                 ],
             ),
         ]
@@ -64,16 +62,16 @@ class SeedSize(Base):
     @classmethod
     def seed_size_match(cls, ent):
         dims = []
-        units = ""
-        part = "seed"
+        units, part = "", ""
 
         for e in ent.ents:
             if e.label_ == "size":
                 dims = e._.trait.dims
                 units = e._.trait.units
 
-            elif e.label_ in cls.parts:
-                part = e.label_
+            elif e.label_ in ("seed_term", "seed_part"):
+                text = e.text.lower()
+                part = cls.replace.get(text, text)
 
         trait = cls.from_ent(ent, part=part, dims=dims, units=units)
         return trait

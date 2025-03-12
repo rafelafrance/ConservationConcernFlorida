@@ -1,17 +1,15 @@
 from ccf.pylib import pipeline
 
 PIPELINE = pipeline.build()
-LEAF_PIPELINE = pipeline.build("leaf")
 
 
-def parse(text: str, part="") -> list:
+def parse(text: str) -> list:
     text = " ".join(text.split())
-    doc = LEAF_PIPELINE(text) if part == "leaf" else PIPELINE(text)
+    doc = PIPELINE(text)
 
     traits = [e._.trait for e in doc.ents]
 
     # from pprint import pp
-    #
     # pp(traits)
 
     return traits

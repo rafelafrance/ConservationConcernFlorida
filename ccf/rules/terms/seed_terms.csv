@@ -1,25 +1,27 @@
-seed_part,pattern
-seed_part,albumen
-seed_part,aril
-seed_part,arils
-seed_part,caruncle
-seed_part,embryo
-seed_part,embryos
-seed_part,endosperm
-seed_part,equatorial-ridge
-seed_part,equatorial-ridges
-seed_part,girdle
-seed_part,girdles
-seed_part,hila
-seed_part,hilum
-seed_part,hull
-seed_part,hulls
-seed_part,interstice
-seed_part,interstices
-seed_part,perisperm
-seed_part,seed coat
-seed_part,seed coats
-seed_part,seed-coat
-seed_part,seed-coats
-seed_part,strophiole
-seed_part,testa
+label,pattern,replace
+seed_part,albumen,albumen
+seed_part,aril,aril
+seed_part,arils,aril
+seed_part,caruncle,caruncle
+seed_part,embryo,embryo
+seed_part,embryos,embryo
+seed_part,endosperm,endosperm
+seed_part,equatorial-ridge,equatorial-ridge
+seed_part,equatorial-ridges,equatorial-ridge
+seed_part,girdle,girdle
+seed_part,girdles,girdle
+seed_part,hila,hilum
+seed_part,hilum,hilum
+seed_part,hull,hull
+seed_part,hulls,hull
+seed_part,interstice,interstice
+seed_part,interstices,interstice
+seed_part,perisperm,perisperm
+seed_part,seed coat,seed coat
+seed_part,seed coats,seed coat
+seed_part,seed-coat,seed coat
+seed_part,seed-coats,seed coat
+seed_part,strophiole,strophiole
+seed_part,testa,testa
+seed_term,seed,seed
+seed_term,seeds,seed

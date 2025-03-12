@@ -15,14 +15,12 @@ from ccf.rules.base import Base
 @dataclass(eq=False)
 class LeafSize(Base):
     # Class vars ----------
-    terms = (Path(__file__).parent / "terms" / "leaf_terms.csv",)
-    parts: ClassVar[list[str]] = term_util.get_labels(terms)
-    other: ClassVar[list[str]] = [t for t in parts if t != "leaf"]
-    leaf: ClassVar[str] = "leaf"
+    terms: ClassVar[Path] = Path(__file__).parent / "terms" / "leaf_terms.csv"
+    replace: ClassVar[dict[str, str]] = term_util.look_up_table(terms, "replace")
     # ---------------------
 
-    part: str | None = None
-    units: str | None = None
+    part: str = None
+    units: str = None
     dims: list[Dimension] = field(default_factory=list)
 
     @classmethod
@@ -50,13 +48,13 @@ class LeafSize(Base):
                 keep="leaf_size",
                 on_match="leaf_size_match",
                 decoder={
-                    "leaf": {"ENT_TYPE": "leaf"},
-                    "other": {"ENT_TYPE": {"IN": cls.other}},
+                    "leaf": {"ENT_TYPE": "leaf_term"},
+                    "part": {"ENT_TYPE": "leaf_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "leaf* size+",
-                    "other* size+",
+                    "leaf+ size+",
+                    "part+ size+",
                 ],
             ),
         ]
@@ -64,16 +62,16 @@ class LeafSize(Base):
     @classmethod
     def leaf_size_match(cls, ent):
         dims = []
-        units = ""
-        part = "leaf"
+        units, part = "", ""
 
         for e in ent.ents:
             if e.label_ == "size":
                 dims = e._.trait.dims
                 units = e._.trait.units
 
-            elif e.label_ in cls.parts:
-                part = e.label_
+            elif e.label_ in ("leaf_part", "leaf_term"):
+                text = e.text.lower()
+                part = cls.replace.get(text, text)
 
         trait = cls.from_ent(ent, part=part, dims=dims, units=units)
         return trait

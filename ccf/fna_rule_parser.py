@@ -14,7 +14,6 @@ from pylib import log, pipeline
 from rules.size import Dimension
 
 PIPELINE = pipeline.build()
-LEAF_PIPELINE = pipeline.build("leaf")
 
 
 SHAPES = set()
@@ -117,7 +116,7 @@ def get_ent(text: str) -> Dimension | None:
 
 
 def get_leaf_size_ent(text: str) -> Dimension | None:
-    doc = LEAF_PIPELINE(text)
+    doc = PIPELINE(text)
     ent = next(
         (
             e._.trait

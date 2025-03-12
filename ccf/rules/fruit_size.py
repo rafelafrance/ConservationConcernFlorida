@@ -15,10 +15,8 @@ from ccf.rules.base import Base
 @dataclass(eq=False)
 class FruitSize(Base):
     # Class vars ----------
-    terms = (Path(__file__).parent / "terms" / "fruit_terms.csv",)
-    parts: ClassVar[list[str]] = term_util.get_labels(terms)
-    other: ClassVar[list[str]] = [t for t in parts if t != "fruit"]
-    fruit: ClassVar[str] = "fruit"
+    terms: ClassVar[Path] = Path(__file__).parent / "terms" / "fruit_terms.csv"
+    replace: ClassVar[dict[str, str]] = term_util.look_up_table(terms, "replace")
     # ---------------------
 
     part: str | None = None
@@ -50,13 +48,14 @@ class FruitSize(Base):
                 keep="fruit_size",
                 on_match="fruit_size_match",
                 decoder={
-                    "fruit": {"ENT_TYPE": "fruit"},
-                    "other": {"ENT_TYPE": {"IN": cls.other}},
+                    "adj": {"ENT_TYPE": "inner_adj"},
+                    "fruit": {"ENT_TYPE": "fruit_type"},
+                    "part": {"ENT_TYPE": "fruit_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "fruit* size+",
-                    "other* size+",
+                    "fruit+      size+",
+                    "part+  adj* size+",
                 ],
             ),
         ]
@@ -64,16 +63,16 @@ class FruitSize(Base):
     @classmethod
     def fruit_size_match(cls, ent):
         dims = []
-        units = ""
-        part = "fruit"
+        units, part = "", ""
 
         for e in ent.ents:
             if e.label_ == "size":
                 dims = e._.trait.dims
                 units = e._.trait.units
 
-            elif e.label_ in cls.parts:
-                part = e.label_
+            elif e.label_ in ("fruit_type", "fruit_part"):
+                text = e.text.lower()
+                part = cls.replace.get(text, text)
 
         trait = cls.from_ent(ent, part=part, dims=dims, units=units)
         return trait

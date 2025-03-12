@@ -2,18 +2,18 @@ import unittest
 
 from ccf.pylib.dimension import Dimension
 from ccf.rules.leaf_size import LeafSize
+from ccf.rules.size import Size
 from tests.setup import parse
 
 
-class TestSize(unittest.TestCase):
-    def test_size_01(self):
+class TestLeafSize(unittest.TestCase):
+    def test_leaf_size_01(self):
         self.assertEqual(
             parse(
                 """
                 Leaves petioles (5–)10–30(–50) mm;
                 sometimes ovate-lanceolate, 4–11(–13) × 2.5–8(–9) cm
-                """,
-                part="leaf",
+                """
             ),
             [
                 LeafSize(
@@ -32,10 +32,9 @@ class TestSize(unittest.TestCase):
                         )
                     ],
                 ),
-                LeafSize(
+                Size(
                     start=63,
                     end=87,
-                    part="leaf",
                     units="cm",
                     dims=[
                         Dimension(
@@ -59,14 +58,13 @@ class TestSize(unittest.TestCase):
             ],
         )
 
-    def test_size_02(self):
+    def test_leaf_size_02(self):
         self.assertEqual(
             parse(
                 """
                 Basal leaves: (petioles 12–18+ cm) blades (lateral veins appressed
                 to midveins 2–4 cm, then spreading) oblong-lanceolate, 15–37 cm
-                """,
-                part="leaf",
+                """
             ),
             [
                 LeafSize(
@@ -88,7 +86,7 @@ class TestSize(unittest.TestCase):
                 LeafSize(
                     start=70,
                     end=85,
-                    part="venation",
+                    part="midrib",
                     units="cm",
                     dims=[
                         Dimension(
@@ -101,10 +99,9 @@ class TestSize(unittest.TestCase):
                         )
                     ],
                 ),
-                LeafSize(
+                Size(
                     start=122,
                     end=130,
-                    part="leaf",
                     units="cm",
                     dims=[
                         Dimension(
@@ -120,16 +117,43 @@ class TestSize(unittest.TestCase):
             ],
         )
 
-    def test_size_03(self):
+    def test_leaf_size_03(self):
         self.assertEqual(
-            parse(
-                """Leaf blades deltate to ± rhombic or ovate, 13–37 × 7–32 mm,""",
-                part="leaf",
-            ),
+            parse("""Leaf blades deltate to ± rhombic or ovate, 13–37 × 7–32 mm,"""),
             [
-                LeafSize(
+                Size(
                     start=43,
                     end=58,
+                    units="cm",
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="mm",
+                            min=None,
+                            low=1.3,
+                            high=3.7,
+                            max=None,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            min=None,
+                            low=0.7,
+                            high=3.2,
+                            max=None,
+                        ),
+                    ],
+                )
+            ],
+        )
+
+    def test_leaf_size_04(self):
+        self.assertEqual(
+            parse("""Leaf blades 13–37 × 7–32 mm,"""),
+            [
+                LeafSize(
+                    start=0,
+                    end=27,
                     part="leaf",
                     units="cm",
                     dims=[
