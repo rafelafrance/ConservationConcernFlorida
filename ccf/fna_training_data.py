@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import csv
 import json
 import re
 import textwrap
@@ -18,19 +17,10 @@ from tqdm import tqdm
 PIPELINE = pipeline.build()
 
 
-SHAPES = set()
-FRUIT_TYPES = set()
-DURATION = set()
-
-
 def main(args):
-    global SHAPES, FRUIT_TYPES, DURATION
-
     log.started()
 
     pages = sorted(args.html_dir.glob("*.html"))
-
-    SHAPES, FRUIT_TYPES, DURATION = get_terms()
 
     records = []
 
@@ -98,7 +88,7 @@ def info_text(info) -> str:
     text = ""
     for key in ("Phenology", "Habitat", "Elevation"):
         if info.get(key, ""):
-            text += "\n" + info[key]
+            text += "\n" + key + ": " + info[key]
     return text
 
 
@@ -106,11 +96,11 @@ def clean(text):
     text = ftfy.fix_text(text)  # Handle common mojibake
     # text = re.sub(r"[–—\-]+", "-", text)
     # text = text.replace("±", "+/-")
+    # text = text.replace("×", "x")
     return text
 
 
-def get_size_trait(text: str, label: str, part: str) -> Size:
-    doc = PIPELINE(text)
+def get_size_trait(doc, label: str, part: str) -> Size:
     ent = next(
         (e._.trait for e in doc.ents if e.label_ == label and e._.trait.part == part),
         None,
@@ -121,8 +111,6 @@ def get_size_trait(text: str, label: str, part: str) -> Size:
 
 
 def get_size_dim(size, text, dim: str) -> str:
-    if not size:
-        return ""
     dim_ = next((d for d in size.dims if d.dim == dim), None)
     value = ""
     if dim_:
@@ -132,43 +120,36 @@ def get_size_dim(size, text, dim: str) -> str:
     return value
 
 
-def vocab_hits(text: str, vocab: set[str], key: str = "") -> str:
-    lower = text.lower()
-
+def vocab_hits(doc, trait: str) -> str:
     start, end = -1, -1
 
-    value = ""
+    for ent in doc.ents:
+        if ent.label_ == trait:
+            start = doc[ent.start].idx if start == -1 else start
+            end = doc[ent.end - 1].idx + len(doc[ent.end - 1])
 
-    if key and key in vocab:
-        value = key
+        # Don't cross another entity
+        elif ent.label_ != trait and start != -1:
+            break
 
-    for word in vocab:
-        if (first := lower.find(word)) != -1:
-            start = min(start, first) if start != -1 else first
-
-        if (last := lower.rfind(word)) != -1:
-            end = max(end, last + len(word))
-
-    if start == -1 or end == -1:
-        return value
-
-    value += " " if value else ""
-    value += text[start:end]
-
+    value = doc.text[start:end] if start != -1 else ""
     return value
 
 
-def plants(key, text, rec: Example):
-    rec.deciduousness = vocab_hits(text, DURATION, key)
+def plants(_key, text, rec: Example):
+    doc = PIPELINE(text)
+    rec.deciduousness = vocab_hits(doc, "leaf_duration")
 
-    size = get_size_trait(text, "", "")
+    size = get_size_trait(doc, "", "")
     rec.plant_height = get_size_dim(size, text, "length")
 
 
 def leaves(_key, text, rec: Example):
-    rec.leaf_shape = vocab_hits(text.lower(), SHAPES)
+    doc = PIPELINE(text)
 
-    size = get_size_trait(text, "leaf_size", "leaf")
+    rec.leaf_shape = vocab_hits(doc, "shape")
+
+    size = get_size_trait(doc, "leaf_size", "leaf")
 
     rec.leaf_length = get_size_dim(size, text, "length")
     rec.leaf_width = get_size_dim(size, text, "width")
@@ -176,23 +157,27 @@ def leaves(_key, text, rec: Example):
 
 
 def seeds(_key, text, rec: Example):
-    size = get_size_trait(text, "seed_size", "seed")
+    doc = PIPELINE(text)
+    size = get_size_trait(doc, "seed_size", "seed")
 
     rec.seed_length = get_size_dim(size, text, "length")
     rec.seed_width = get_size_dim(size, text, "width")
 
 
 def fruits(key, text, rec: Example):
-    rec.fruit_type = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
+    doc = PIPELINE(f"{key} {text}")
+    rec.fruit_type = vocab_hits(doc, "fruit_type")
 
-    size = get_size_trait(text, "fruit_size", "fruit")
+    size = get_size_trait(doc, "fruit_size", "fruit")
 
     rec.fruit_length = get_size_dim(size, text, "length")
     rec.fruit_width = get_size_dim(size, text, "width")
 
 
 def phenology(info, rec: Example):
-    rec.flowering_time = info.get("Phenology", "")
+    value = info.get("Phenology", "")
+    value = re.sub(r"[.]$", "", value)
+    rec.phenology = value
 
 
 def habitat(info, rec: Example):
@@ -201,30 +186,9 @@ def habitat(info, rec: Example):
 
 def elevation(info, rec: Example):
     text = info.get("Elevation", "")
-    size = get_size_trait(text, "", "")
+    doc = PIPELINE(text)
+    size = get_size_trait(doc, "", "")
     rec.elevation = get_size_dim(size, text, "length")
-
-
-def get_terms():
-    shape_file = Path(__file__).parent / "rules" / "terms" / "shape_terms.csv"
-    fruit_file = Path(__file__).parent / "rules" / "terms" / "fruit_terms.csv"
-    dur_file = Path(__file__).parent / "rules" / "terms" / "leaf_terms.csv"
-
-    with shape_file.open() as f:
-        shapes = {r["pattern"] for r in csv.DictReader(f)}
-
-    with fruit_file.open() as f:
-        fruit_types = {
-            r["pattern"] for r in csv.DictReader(f) if r["label"] == "fruit_type"
-        }
-    fruit_types -= {"fruit", "fruits"}
-
-    with dur_file.open() as f:
-        duration = {
-            r["pattern"] for r in csv.DictReader(f) if r["label"] == "leaf_duration"
-        }
-
-    return shapes, fruit_types, duration
 
 
 PARSE = {

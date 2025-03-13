@@ -1,65 +1,38 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import textwrap
 from pathlib import Path
-from pprint import pp
 
 import dspy
-from bs4 import BeautifulSoup
 from pylib import log
-
-
-class ExtractInfo(dspy.Signature):
-    """Analyze species descriptions and extract trait information."""
-
-    text: str = dspy.InputField()
-    question: str = dspy.InputField()
-    entities: list[dict[str, str]] = dspy.OutputField(desc="list of extracted traits")
+from pylib.lm_data import QUESTION, ExtractInfo, compare, dict_to_example
 
 
 def main(args):
     log.started()
 
-    pages = sorted(args.html_dir.glob("*.html"))
+    with args.examples.open() as f:
+        example_data = json.load(f)
+
+    examples = [dict_to_example(d) for d in example_data]
 
     lm = dspy.LM(args.model, api_base=args.api_base, api_key=args.api_key)
-
-    questions = [
-        """ What is the plant size,
-            leaf shape, leaf length, leaf width, leaf thickness,
-            seed length, seed width,
-            fruit type, fruit length, fruit width,
-            deciduousness?
-            If it is not mentioned return an empty value.
-            Convert text to ASCII.
-            """,
-    ]
-
-    test = argparse.Namespace()
-    test.aa = 10
-    print(test)
-
+    dspy.configure(lm=lm)
     module = dspy.Predict(ExtractInfo)
 
-    for page in pages[:10]:
+    for example in examples[:10]:
         print("=" * 80)
-        print(page.stem)
+        print(example.taxon)
 
-        with page.open() as f:
-            text = f.read()
+        print()
+        print(example.text)
+        print()
 
-        soup = BeautifulSoup(text, features="lxml")
-
-        treatment = soup.find("span", class_="statement")
-        print(treatment)
-
-        for quest in questions:
-            dspy.configure(lm=lm)
-            reply = module(text=treatment, question=quest)
-            print(page.stem)
-            pp(reply.entities)
-            print()
+        pred = module(text=example.text, prompt=QUESTION)
+        compare(example, pred.traits)
+        print()
 
     log.finished()
 
@@ -71,11 +44,11 @@ def parse_args():
     )
 
     arg_parser.add_argument(
-        "--html-dir",
+        "--examples",
         type=Path,
         required=True,
         metavar="PATH",
-        help="""Parse HTML files in this directory.""",
+        help="""Get language model examples from this JSON file.""",
     )
 
     arg_parser.add_argument(

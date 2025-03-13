@@ -21,6 +21,7 @@ dependencies = [
     "pillow",
     "playwright",
     "regex",
+    "rich",
     "spacy",
     "tqdm",
 ]
