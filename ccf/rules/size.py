@@ -143,14 +143,7 @@ class Size(Base):
                 if value is None:
                     continue
 
-                value = float(value)
-
-                # factor = cls.factors_cm.get(dim.units)
-                # if factor is None:
-                #     raise reject_match.RejectMatch
-
-                # value = round(value * factor, 3)
-                setattr(dim, key, value)
+                setattr(dim, key, float(value))
 
         trait = cls.from_ent(ent, dims=dims)
         return trait
@@ -175,6 +168,7 @@ class Size(Base):
 
                 value = round(value * factor, 3)
                 setattr(dim, key, value)
+        return size_trait
 
 
 @registry.misc("size_match")

@@ -2,16 +2,18 @@
 
 import argparse
 import csv
+import json
 import re
 import textwrap
-from collections import defaultdict
+from dataclasses import asdict
 from pathlib import Path
 
 import ftfy
-import pandas as pd
 from bs4 import BeautifulSoup
 from pylib import log, pipeline
-from rules.size import Dimension, Size
+from pylib.lm_data import Example
+from rules.size import Size
+from tqdm import tqdm
 
 PIPELINE = pipeline.build()
 
@@ -32,58 +34,57 @@ def main(args):
 
     records = []
 
-    all_keys = defaultdict(list)
-
-    for page in pages:
-        print(page.stem)
-
+    for page in tqdm(pages):
         with page.open() as f:
             text = f.read()
 
         soup = BeautifulSoup(text, features="lxml")
 
-        treat = get_treatment(soup)
-
-        if args.print_keys:
-            for key, value in treat.items():
-                all_keys[key].append(value)
-            continue
+        treatment, treatment_text = get_treatment(soup)
+        info = get_info(soup)
 
         taxon = page.stem.replace("_", " ")
         taxon = taxon[0].upper() + taxon[1:]
-        rec = {"taxon": clean(taxon).replace("×", "x ")}
+
+        rec = Example(
+            taxon=clean(taxon).replace("×", "x "),
+            text=treatment_text + info_text(info),
+        )
 
         used = set()
 
-        for key, text in treat.items():
+        for key, value in treatment.items():
             if (func := PARSE.get(key)) and func not in used:
                 used.add(func)  # Only use a parse function once
-                func(key, text, rec)
+                func(key, value, rec)
 
-        info = get_info(soup)
         phenology(info, rec)
         habitat(info, rec)
         elevation(info, rec)
 
-        records.append(rec)
+        records.append(asdict(rec))
 
-    pd.DataFrame(records).to_csv(args.out_csv, index=False)
+    with args.out_json.open("w") as f:
+        json.dump(records, f, indent=4)
 
     log.finished()
 
 
-def get_treatment(soup):
-    treat = soup.find("span", class_="statement")
-    if not treat:
-        return {}
+def get_treatment(soup) -> tuple[dict[str, str], str]:
+    treatment = soup.find("span", class_="statement")
+    if not treatment:
+        return {}, ""
 
-    text = str(treat).replace("<i>", "").replace("</i>", "")
-    text = clean(text)
+    treatment = [str(c) for c in treatment.contents]
+
+    text = "".join(treatment)
+    text = clean(text).replace("<i>", "").replace("</i>", "")
 
     soup2 = BeautifulSoup(text, features="lxml")
     parts = [p.text.strip() for p in soup2.find_all(string=True)]
-    treat = dict(zip(parts[0::2], parts[1::2], strict=True))
-    return treat
+    parts = dict(zip(parts[0::2], parts[1::2], strict=True))
+
+    return parts, text
 
 
 def get_info(soup):
@@ -93,10 +94,18 @@ def get_info(soup):
     return info
 
 
+def info_text(info) -> str:
+    text = ""
+    for key in ("Phenology", "Habitat", "Elevation"):
+        if info.get(key, ""):
+            text += "\n" + info[key]
+    return text
+
+
 def clean(text):
     text = ftfy.fix_text(text)  # Handle common mojibake
-    text = re.sub(r"[–—\-]+", "-", text)
-    text = text.replace("±", "+/-")
+    # text = re.sub(r"[–—\-]+", "-", text)
+    # text = text.replace("±", "+/-")
     return text
 
 
@@ -111,107 +120,89 @@ def get_size_trait(text: str, label: str, part: str) -> Size:
     return ent
 
 
-def get_size_dim(size, dim: str = "length") -> Dimension:
+def get_size_dim(size, text, dim: str) -> str:
     if not size:
-        return Dimension()
-    dim_ = next((d for d in size.dims if d.dim == dim), Dimension())
-    return dim_
+        return ""
+    dim_ = next((d for d in size.dims if d.dim == dim), None)
+    value = ""
+    if dim_:
+        value = text[dim_.start : dim_.end]
+        value = re.sub(r"[.]$", "", value)
+        value += "" if value.endswith(dim_.units) else f" {dim_.units}"
+    return value
 
 
-def vocab_hits(text, vocab, key=None):
-    hits = {key: 1} if key and key.lower() in vocab else {}
-    hits |= {w: 1 for w in re.split(r"\W+", text) if w.lower() in vocab}
-    return " | ".join(hits.keys())
+def vocab_hits(text: str, vocab: set[str], key: str = "") -> str:
+    lower = text.lower()
+
+    start, end = -1, -1
+
+    value = ""
+
+    if key and key in vocab:
+        value = key
+
+    for word in vocab:
+        if (first := lower.find(word)) != -1:
+            start = min(start, first) if start != -1 else first
+
+        if (last := lower.rfind(word)) != -1:
+            end = max(end, last + len(word))
+
+    if start == -1 or end == -1:
+        return value
+
+    value += " " if value else ""
+    value += text[start:end]
+
+    return value
 
 
-def plants(key, text, rec):
-    rec["deciduousness"] = vocab_hits(text, DURATION, key)
+def plants(key, text, rec: Example):
+    rec.deciduousness = vocab_hits(text, DURATION, key)
 
     size = get_size_trait(text, "", "")
-    length = get_size_dim(size, "length")
-
-    rec["plant_height_min_cm"] = length.min
-    rec["plant_height_low_cm"] = length.low
-    rec["plant_height_high_cm"] = length.high
-    rec["plant_height_max_cm"] = length.max
+    rec.plant_height = get_size_dim(size, text, "length")
 
 
-def leaves(_key, text, rec):
-    rec["leaf_shape"] = vocab_hits(text.lower(), SHAPES)
+def leaves(_key, text, rec: Example):
+    rec.leaf_shape = vocab_hits(text.lower(), SHAPES)
 
     size = get_size_trait(text, "leaf_size", "leaf")
 
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-    thickness = get_size_dim(size, "thickness")
-
-    rec["leaf_length_min_cm"] = length.min
-    rec["leaf_length_low_cm"] = length.low
-    rec["leaf_length_high_cm"] = length.high
-
-    rec["leaf_length_max_cm"] = length.max
-    rec["leaf_width_min_cm"] = width.min
-    rec["leaf_width_low_cm"] = width.low
-    rec["leaf_width_high_cm"] = width.high
-    rec["leaf_width_max_cm"] = width.max
-
-    rec["leaf_thickness_min_cm"] = thickness.min
-    rec["leaf_thickness_low_cm"] = thickness.low
-    rec["leaf_thickness_high_cm"] = thickness.high
-    rec["leaf_thickness_max_cm"] = thickness.max
+    rec.leaf_length = get_size_dim(size, text, "length")
+    rec.leaf_width = get_size_dim(size, text, "width")
+    rec.leaf_thickness = get_size_dim(size, text, "thickness")
 
 
-def seeds(_key, text, rec):
+def seeds(_key, text, rec: Example):
     size = get_size_trait(text, "seed_size", "seed")
 
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-
-    rec["seed_length_min_cm"] = length.min
-    rec["seed_length_low_cm"] = length.low
-    rec["seed_length_high_cm"] = length.high
-    rec["seed_length_max_cm"] = length.max
-
-    rec["seed_width_min_cm"] = width.min
-    rec["seed_width_low_cm"] = width.low
-    rec["seed_width_high_cm"] = width.high
-    rec["seed_width_max_cm"] = width.max
+    rec.seed_length = get_size_dim(size, text, "length")
+    rec.seed_width = get_size_dim(size, text, "width")
 
 
-def fruits(key, text, rec):
-    rec["fruit_type"] = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
+def fruits(key, text, rec: Example):
+    rec.fruit_type = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
 
     size = get_size_trait(text, "fruit_size", "fruit")
 
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-
-    rec["fruit_length_min_cm"] = length.min
-    rec["fruit_length_low_cm"] = length.low
-    rec["fruit_length_high_cm"] = length.high
-    rec["fruit_length_max_cm"] = length.max
-
-    rec["fruit_width_min_cm"] = width.min
-    rec["fruit_width_low_cm"] = width.low
-    rec["fruit_width_high_cm"] = width.high
-    rec["fruit_width_max_cm"] = width.max
+    rec.fruit_length = get_size_dim(size, text, "length")
+    rec.fruit_width = get_size_dim(size, text, "width")
 
 
-def phenology(info, rec):
-    rec["flowering_time"] = info.get("Phenology", "")
+def phenology(info, rec: Example):
+    rec.flowering_time = info.get("Phenology", "")
 
 
-def habitat(info, rec):
-    rec["habitat"] = info.get("Habitat", "")
+def habitat(info, rec: Example):
+    rec.habitat = info.get("Habitat", "")
 
 
-def elevation(info, rec):
+def elevation(info, rec: Example):
     text = info.get("Elevation", "")
     size = get_size_trait(text, "", "")
-    elev = get_size_dim(size, "length")
-
-    rec["elevation_min_m"] = elev.low / 100.0 if elev.low is not None else None
-    rec["elevation_max_m"] = elev.high / 100.0 if elev.high is not None else None
+    rec.elevation = get_size_dim(size, text, "length")
 
 
 def get_terms():
@@ -226,6 +217,7 @@ def get_terms():
         fruit_types = {
             r["pattern"] for r in csv.DictReader(f) if r["label"] == "fruit_type"
         }
+    fruit_types -= {"fruit", "fruits"}
 
     with dur_file.open() as f:
         duration = {
@@ -314,7 +306,9 @@ PARSE = {
 def parse_args():
     arg_parser = argparse.ArgumentParser(
         allow_abbrev=True,
-        description=textwrap.dedent("Parse data from downloaded HTML files."),
+        description=textwrap.dedent(
+            "Make LM training data from downloaded HTML files."
+        ),
     )
 
     arg_parser.add_argument(
@@ -326,16 +320,10 @@ def parse_args():
     )
 
     arg_parser.add_argument(
-        "--out-csv",
+        "--out-json",
         type=Path,
         metavar="PATH",
-        help="""Output the results to this CSV file.""",
-    )
-
-    arg_parser.add_argument(
-        "--print-keys",
-        action="store_true",
-        help="""Print a list of treatment keys and exit.""",
+        help="""Output the results to this JSON file.""",
     )
 
     args = arg_parser.parse_args()

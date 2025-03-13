@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Traits:
-    plant_size: str = ""
+    plant_height: str = ""
     leaf_shape: str = ""
     leaf_length: str = ""
     leaf_width: str = ""
@@ -14,8 +14,12 @@ class Traits:
     seed_length: str = ""
     seed_width: str = ""
     deciduousness: str = ""
+    flowering_time: str = ""
+    habitat: str = ""
+    elevation: str = ""
 
 
 @dataclass
-class Example:
-    text: str
+class Example(Traits):
+    taxon: str = ""
+    text: str = ""

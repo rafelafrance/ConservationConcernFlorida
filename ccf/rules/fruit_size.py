@@ -19,7 +19,7 @@ class FruitSize(Base):
     replace: ClassVar[dict[str, str]] = term_util.look_up_table(terms, "replace")
     # ---------------------
 
-    part: str | None = None
+    part: str = ""
     dims: list[Dimension] = field(default_factory=list)
 
     @classmethod
@@ -48,12 +48,12 @@ class FruitSize(Base):
                 on_match="fruit_size_match",
                 decoder={
                     "adj": {"ENT_TYPE": "inner_adj"},
-                    "fruit": {"ENT_TYPE": "fruit_type"},
+                    "type": {"ENT_TYPE": {"IN": ["fruit_type", "fruit"]}},
                     "part": {"ENT_TYPE": "fruit_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "fruit+      size+",
+                    "type+       size+",
                     "part+  adj* size+",
                 ],
             ),
@@ -68,7 +68,7 @@ class FruitSize(Base):
             if e.label_ == "size":
                 dims = e._.trait.dims
 
-            elif e.label_ in ("fruit_type", "fruit_part"):
+            elif e.label_ in ("fruit_type", "fruit_part", "fruit"):
                 text = e.text.lower()
                 part = cls.replace.get(text, text)
 

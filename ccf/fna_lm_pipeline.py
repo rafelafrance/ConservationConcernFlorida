@@ -32,13 +32,8 @@ def main(args):
             fruit type, fruit length, fruit width,
             deciduousness?
             If it is not mentioned return an empty value.
+            Convert text to ASCII.
             """,
-        # """ What is the fruit type?
-        #     A fruit type is like (berry, pome, stone, achene, capsule, caryopsis,
-        #         cypsela, drupe, follicle, hesperidia, legume, loment nut pepo, samara,
-        #         schizocarp, silicle, siliqua, utricle).
-        #     If it is not mentioned return an empty string.
-        #     """,
     ]
 
     test = argparse.Namespace()

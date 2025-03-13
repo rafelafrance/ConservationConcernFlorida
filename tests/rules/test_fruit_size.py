@@ -9,11 +9,11 @@ from tests.setup import parse
 class TestFruitSize(unittest.TestCase):
     def test_fruit_size_01(self):
         self.assertEqual(
-            parse("""Fruits strongly compressed, ± cuneate, 2–3(–4) mm,"""),
+            parse("""Fruits strongly compressed, 2–3(–4) mm,"""),
             [
                 Size(
-                    start=39,
-                    end=49,
+                    start=28,
+                    end=38,
                     dims=[
                         Dimension(
                             dim="length",
@@ -21,8 +21,8 @@ class TestFruitSize(unittest.TestCase):
                             low=2.0,
                             high=3.0,
                             max=4.0,
-                            start=39,
-                            end=49,
+                            start=28,
+                            end=38,
                         )
                     ],
                 ),

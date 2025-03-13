@@ -11,6 +11,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from pylib import log, pipeline
 from rules.size import Dimension, Size
+from tqdm import tqdm
 
 PIPELINE = pipeline.build()
 
@@ -31,7 +32,7 @@ def main(args):
 
     records = []
 
-    for page in pages:
+    for page in tqdm(pages):
         with page.open() as f:
             text = f.read()
 
@@ -85,8 +86,8 @@ def get_info(soup):
 
 def clean(text):
     text = ftfy.fix_text(text)  # Handle common mojibake
-    text = re.sub(r"[–—\-]+", "-", text)
-    text = text.replace("±", "+/-")
+    # text = re.sub(r"[–—\-]+", "-", text)
+    # text = text.replace("±", "+/-")
     return text
 
 
@@ -118,6 +119,8 @@ def plants(key, text, rec):
     rec["deciduousness"] = vocab_hits(text, DURATION, key)
 
     size = get_size_trait(text, "", "")
+    size = Size.convert_units_to_cm(size)
+
     length = get_size_dim(size, "length")
 
     rec["plant_height_min_cm"] = length.min
@@ -130,6 +133,7 @@ def leaves(_key, text, rec):
     rec["leaf_shape"] = vocab_hits(text.lower(), SHAPES)
 
     size = get_size_trait(text, "leaf_size", "leaf")
+    size = Size.convert_units_to_cm(size)
 
     length = get_size_dim(size, "length")
     width = get_size_dim(size, "width")
@@ -153,6 +157,7 @@ def leaves(_key, text, rec):
 
 def seeds(_key, text, rec):
     size = get_size_trait(text, "seed_size", "seed")
+    size = Size.convert_units_to_cm(size)
 
     length = get_size_dim(size, "length")
     width = get_size_dim(size, "width")
@@ -172,6 +177,7 @@ def fruits(key, text, rec):
     rec["fruit_type"] = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
 
     size = get_size_trait(text, "fruit_size", "fruit")
+    size = Size.convert_units_to_cm(size)
 
     length = get_size_dim(size, "length")
     width = get_size_dim(size, "width")
@@ -200,8 +206,8 @@ def elevation(info, rec):
     size = get_size_trait(text, "", "")
     elev = get_size_dim(size, "length")
 
-    rec["elevation_min_m"] = elev.low / 100.0 if elev.low is not None else None
-    rec["elevation_max_m"] = elev.high / 100.0 if elev.high is not None else None
+    rec["elevation_min_m"] = elev.low
+    rec["elevation_max_m"] = elev.high
 
 
 def get_terms():
@@ -216,6 +222,7 @@ def get_terms():
         fruit_types = {
             r["pattern"] for r in csv.DictReader(f) if r["label"] == "fruit_type"
         }
+    fruit_types -= {"fruit", "fruits"}
 
     with dur_file.open() as f:
         duration = {

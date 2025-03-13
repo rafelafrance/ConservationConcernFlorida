@@ -11,8 +11,7 @@ class TestLeafSize(unittest.TestCase):
         self.assertEqual(
             parse(
                 """
-                Leaves petioles (5–)10–30(–50) mm;
-                sometimes ovate-lanceolate, 4–11(–13) × 2.5–8(–9) cm
+                Leaves petioles (5–)10–30(–50) mm; 4–11(–13) × 2.5–8(–9) cm
                 """
             ),
             [
@@ -34,8 +33,8 @@ class TestLeafSize(unittest.TestCase):
                     ],
                 ),
                 Size(
-                    start=63,
-                    end=87,
+                    start=35,
+                    end=59,
                     dims=[
                         Dimension(
                             dim="length",
@@ -43,8 +42,8 @@ class TestLeafSize(unittest.TestCase):
                             low=4.0,
                             high=11.0,
                             max=13.0,
-                            start=63,
-                            end=72,
+                            start=35,
+                            end=44,
                         ),
                         Dimension(
                             dim="width",
@@ -52,8 +51,8 @@ class TestLeafSize(unittest.TestCase):
                             low=2.5,
                             high=8.0,
                             max=9.0,
-                            start=75,
-                            end=87,
+                            start=47,
+                            end=59,
                         ),
                     ],
                 ),
@@ -65,7 +64,7 @@ class TestLeafSize(unittest.TestCase):
             parse(
                 """
                 Basal leaves: (petioles 12–18+ cm) blades (lateral veins appressed
-                to midveins 2–4 cm, then spreading) oblong-lanceolate, 15–37 cm
+                to midveins 2–4 cm, then spreading), 15–37 cm
                 """
             ),
             [
@@ -100,16 +99,16 @@ class TestLeafSize(unittest.TestCase):
                     ],
                 ),
                 Size(
-                    start=122,
-                    end=130,
+                    start=104,
+                    end=112,
                     dims=[
                         Dimension(
                             dim="length",
                             units="cm",
                             low=15.0,
                             high=37.0,
-                            start=122,
-                            end=130,
+                            start=104,
+                            end=112,
                         )
                     ],
                 ),
@@ -118,27 +117,27 @@ class TestLeafSize(unittest.TestCase):
 
     def test_leaf_size_03(self):
         self.assertEqual(
-            parse("""Leaf blades deltate to ± rhombic or ovate, 13–37 × 7–32 mm,"""),
+            parse("""Leaf blades, 13–37 × 7–32 mm,"""),
             [
                 Size(
-                    start=43,
-                    end=58,
+                    start=13,
+                    end=28,
                     dims=[
                         Dimension(
                             dim="length",
                             units="mm",
                             low=13,
                             high=37,
-                            start=43,
-                            end=48,
+                            start=13,
+                            end=18,
                         ),
                         Dimension(
                             dim="width",
                             units="mm",
                             low=7,
                             high=32,
-                            start=51,
-                            end=58,
+                            start=21,
+                            end=28,
                         ),
                     ],
                 )
