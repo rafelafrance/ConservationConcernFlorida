@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field, fields, make_dataclass
 
 import dspy
 from Levenshtein import ratio
@@ -36,32 +36,66 @@ class Traits:
 class Example(Traits):
     taxon: str = ""
     text: str = ""
-    score: float = 0.0
+
+    @classmethod
+    def dict_to_example(cls, dct):
+        example = cls()
+        for fld in fields(cls):
+            fld = fld.name
+            setattr(example, fld, dct.get(fld, ""))
+        return example
 
 
-TRAIT_FIELDS = list(asdict(Traits()).keys())
-EXAMPLE_FIELDS = list(asdict(Example()).keys())
+# I don't want to type in all of the trait fields again
+TraitScores = make_dataclass(
+    "TraitScores",
+    [(f.name, float, field(default=0.0)) for f in fields(Traits)],
+)
 
 
-def score_example(trues, preds) -> float:
-    score = 0.0
+@dataclass
+class Score:
+    taxon: str = ""
+    text: str = ""
+    total_score: float = 0.0
+    trues: Traits = field(default_factory=Traits)
+    preds: Traits = field(default_factory=Traits)
+    scores: TraitScores = field(default_factory=TraitScores)  # type: ignore [reportGeneralTypeIssues]
 
-    for field in TRAIT_FIELDS:
-        true = getattr(trues, field)
-        pred = getattr(preds, field)
+    @classmethod
+    def score_example(cls, example, preds):
+        score = cls(taxon=example.taxon)
 
-        score += ratio(true, pred)
+        flds = [fld.name for fld in fields(Traits)]
+        for fld in flds:
+            true = getattr(example, fld)
+            pred = getattr(preds, fld)
 
-    score /= len(TRAIT_FIELDS)
+            setattr(score.trues, fld, true)
+            setattr(score.preds, fld, pred)
 
-    return score
+            value = ratio(true, pred)
+            setattr(score.scores, fld, value)
+            score.total_score += value
 
+        score.total_score /= len(flds)
 
-def dict_to_example(dct):
-    example = Example()
-    for field in EXAMPLE_FIELDS:
-        setattr(example, field, dct.get(field, ""))
-    return example
+        return score
+
+    def display(self):
+        flds = [fld.name for fld in fields(Traits)]
+        for fld in flds:
+            true = getattr(self.trues, fld)
+            pred = getattr(self.preds, fld)
+            true_folded = true.casefold()
+            pred_folded = pred.casefold()
+            if true_folded == pred_folded and true == "":
+                rprint(f"[yellow]{fld}:")
+            elif true_folded == pred_folded:
+                rprint(f"[green]{fld}: {true}")
+            else:
+                rprint(f"[red]{fld}: {true} != {pred}")
+        rprint(f"[blue]Score = {(self.total_score * 100.0):6.2f}")
 
 
 class ExtractInfo(dspy.Signature):
@@ -70,18 +104,3 @@ class ExtractInfo(dspy.Signature):
     text: str = dspy.InputField(desc="the species description text")
     prompt: str = dspy.InputField(desc="extract these traits")
     traits: Traits = dspy.OutputField(desc="the extracted traits")
-
-
-def display_results(trues: Example, preds: Example):
-    for field in TRAIT_FIELDS:
-        true = getattr(trues, field)
-        pred = getattr(preds, field)
-        true_folded = true.casefold()
-        pred_folded = pred.casefold()
-        if true_folded == pred_folded and true == "":
-            rprint(f"[yellow]{field}:")
-        elif true_folded == pred_folded:
-            rprint(f"[green]{field}: {true}")
-        else:
-            rprint(f"[red]{field}: {true} != {pred}")
-    rprint(f"[blue]Score = {score_example(trues, preds):0.4f}")

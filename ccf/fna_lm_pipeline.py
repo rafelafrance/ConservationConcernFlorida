@@ -7,13 +7,10 @@ from pathlib import Path
 
 import dspy
 from pylib import log
-from pylib.lm_data import (
-    PROMPT,
-    ExtractInfo,
-    dict_to_example,
-    display_results,
-    score_example,
-)
+from pylib.lm_data import PROMPT, Example, ExtractInfo, Score
+from rich import print as rprint
+
+# from pprint import pp
 
 
 def main(args):
@@ -22,12 +19,13 @@ def main(args):
     with args.examples.open() as f:
         example_data = json.load(f)
 
-    examples = [dict_to_example(d) for d in example_data]
+    examples = [Example.dict_to_example(d) for d in example_data]
 
     lm = dspy.LM(args.model, api_base=args.api_base, api_key=args.api_key)
     dspy.configure(lm=lm)
     module = dspy.Predict(ExtractInfo)
 
+    scores = []
     examples = examples[: args.limit] if args.limit else examples
     for example in examples:
         print("=" * 80)
@@ -38,12 +36,14 @@ def main(args):
         print()
 
         pred = module(text=example.text, prompt=PROMPT)
-        example.score = score_example(example, pred.traits)
-        display_results(example, pred.traits)
 
-    total_score = sum(e.score for e in examples)
-    avg_score = total_score / len(examples)
-    print(f"Average score = {avg_score:0.4f}")
+        score = Score.score_example(example, pred.traits)
+        score.display()
+        scores.append(score)
+
+    total_score = sum(s.total_score for s in scores)
+    avg_score = total_score / len(scores)
+    rprint(f"\n[blue]Average score = {(avg_score * 100.0):6.2f}")
 
     log.finished()
 
