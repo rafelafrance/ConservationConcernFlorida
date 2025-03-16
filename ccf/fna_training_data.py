@@ -165,8 +165,14 @@ def seeds(_key, text, rec: Example):
 
 
 def fruits(key, text, rec: Example):
-    doc = PIPELINE(f"{key} {text}")
-    rec.fruit_type = vocab_hits(doc, "fruit_type")
+    key_doc = PIPELINE(key)
+    doc = PIPELINE(text)
+    key_type = vocab_hits(key_doc, "fruit_type")
+    fruit_type = vocab_hits(doc, "fruit_type")
+
+    rec.fruit_type = key_type
+    rec.fruit_type += " " if key_type and fruit_type else ""
+    rec.fruit_type += fruit_type
 
     size = get_size_trait(doc, "fruit_size", "fruit")
 

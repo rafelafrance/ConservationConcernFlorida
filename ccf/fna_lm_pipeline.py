@@ -7,7 +7,13 @@ from pathlib import Path
 
 import dspy
 from pylib import log
-from pylib.lm_data import QUESTION, ExtractInfo, compare, dict_to_example
+from pylib.lm_data import (
+    PROMPT,
+    ExtractInfo,
+    dict_to_example,
+    display_results,
+    score_example,
+)
 
 
 def main(args):
@@ -22,7 +28,8 @@ def main(args):
     dspy.configure(lm=lm)
     module = dspy.Predict(ExtractInfo)
 
-    for example in examples[:10]:
+    examples = examples[: args.limit] if args.limit else examples
+    for example in examples:
         print("=" * 80)
         print(example.taxon)
 
@@ -30,9 +37,13 @@ def main(args):
         print(example.text)
         print()
 
-        pred = module(text=example.text, prompt=QUESTION)
-        compare(example, pred.traits)
-        print()
+        pred = module(text=example.text, prompt=PROMPT)
+        example.score = score_example(example, pred.traits)
+        display_results(example, pred.traits)
+
+    total_score = sum(e.score for e in examples)
+    avg_score = total_score / len(examples)
+    print(f"Average score = {avg_score:0.4f}")
 
     log.finished()
 
@@ -65,7 +76,14 @@ def parse_args():
 
     arg_parser.add_argument(
         "--api-key",
-        help="""Key for the LM model.""",
+        help="""Key for the LM provider.""",
+    )
+
+    arg_parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="""Limit to this many input examples.""",
     )
 
     args = arg_parser.parse_args()
