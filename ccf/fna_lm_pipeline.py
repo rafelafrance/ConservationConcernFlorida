@@ -24,15 +24,16 @@ def main(args):
     lm = dspy.LM(args.model, api_base=args.api_base, api_key=args.api_key)
     dspy.configure(lm=lm)
     module = dspy.Predict(ExtractInfo)
+    # module = dspy.ChainOfThought(ExtractInfo)
 
     scores = []
     examples = examples[: args.limit] if args.limit else examples
-    for example in examples:
-        print("=" * 80)
-        print(example.taxon)
+    for i, example in enumerate(examples, 1):
+        rprint(f"[blue]{'=' * 80}")
+        rprint(f"[blue]{i} {example.taxon}")
 
         print()
-        print(example.text)
+        rprint(f"[blue]{example.text}")
         print()
 
         pred = module(text=example.text, prompt=PROMPT)
@@ -41,9 +42,7 @@ def main(args):
         score.display()
         scores.append(score)
 
-    total_score = sum(s.total_score for s in scores)
-    avg_score = total_score / len(scores)
-    rprint(f"\n[blue]Average score = {(avg_score * 100.0):6.2f}")
+    Score.summary(scores)
 
     log.finished()
 
@@ -64,7 +63,7 @@ def parse_args():
 
     arg_parser.add_argument(
         "--model",
-        default="ollama_chat/qwq",
+        default="ollama_chat/gemma3:27b",
         help="""Use this LLM model. (default: %(default)s)""",
     )
 

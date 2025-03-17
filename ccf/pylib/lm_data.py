@@ -46,7 +46,7 @@ class Example(Traits):
         return example
 
 
-# I don't want to type in all of the trait fields again
+# I don't want to type in all of the trait fields again just to change the type to float
 TraitScores = make_dataclass(
     "TraitScores",
     [(f.name, float, field(default=0.0)) for f in fields(Traits)],
@@ -89,13 +89,22 @@ class Score:
             pred = getattr(self.preds, fld)
             true_folded = true.casefold()
             pred_folded = pred.casefold()
-            if true_folded == pred_folded and true == "":
-                rprint(f"[yellow]{fld}:")
-            elif true_folded == pred_folded:
+            if true_folded == pred_folded:
                 rprint(f"[green]{fld}: {true}")
             else:
-                rprint(f"[red]{fld}: {true} != {pred}")
+                rprint(f"[red]{fld}: {true} [/red]!= [yellow]{pred}")
         rprint(f"[blue]Score = {(self.total_score * 100.0):6.2f}")
+
+    @staticmethod
+    def summary(scores: list):
+        rprint("\n[blue]Score summary:\n")
+        count = float(len(scores))
+        flds = [fld.name for fld in fields(Traits)]
+        for fld in flds:
+            score: float = sum(getattr(s.scores, fld) for s in scores)
+            rprint(f"[blue]{fld + ':':<16} {score / count * 100.0:6.2f}")
+        total_score = sum(s.total_score for s in scores) / count * 100.0
+        rprint(f"\n[blue]{'Total Score:':<16} {total_score:6.2f}\n")
 
 
 class ExtractInfo(dspy.Signature):
