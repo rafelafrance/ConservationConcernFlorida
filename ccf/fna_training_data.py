@@ -10,7 +10,7 @@ from pathlib import Path
 import ftfy
 from bs4 import BeautifulSoup
 from pylib import log, pipeline
-from pylib.lm_data import Example
+from pylib.lm_data import Instance
 from rules.size import Size
 from tqdm import tqdm
 
@@ -36,7 +36,7 @@ def main(args):
         taxon = page.stem.replace("_", " ")
         taxon = taxon[0].upper() + taxon[1:]
 
-        rec = Example(
+        rec = Instance(
             taxon=clean(taxon).replace("×", "x "),
             text=treatment_text + info_text(info),
         )
@@ -136,65 +136,65 @@ def vocab_hits(doc, trait: str) -> str:
     return value
 
 
-def plants(_key, text, rec: Example):
+def plants(_key, text, rec: Instance):
     doc = PIPELINE(text)
-    rec.deciduousness = vocab_hits(doc, "leaf_duration")
+    rec.traits.deciduousness = vocab_hits(doc, "leaf_duration")
 
     size = get_size_trait(doc, "", "")
-    rec.plant_height = get_size_dim(size, text, "length")
+    rec.traits.plant_height = get_size_dim(size, text, "length")
 
 
-def leaves(_key, text, rec: Example):
+def leaves(_key, text, rec: Instance):
     doc = PIPELINE(text)
 
-    rec.leaf_shape = vocab_hits(doc, "shape")
+    rec.traits.leaf_shape = vocab_hits(doc, "shape")
 
     size = get_size_trait(doc, "leaf_size", "leaf")
 
-    rec.leaf_length = get_size_dim(size, text, "length")
-    rec.leaf_width = get_size_dim(size, text, "width")
-    rec.leaf_thickness = get_size_dim(size, text, "thickness")
+    rec.traits.leaf_length = get_size_dim(size, text, "length")
+    rec.traits.leaf_width = get_size_dim(size, text, "width")
+    rec.traits.leaf_thickness = get_size_dim(size, text, "thickness")
 
 
-def seeds(_key, text, rec: Example):
+def seeds(_key, text, rec: Instance):
     doc = PIPELINE(text)
     size = get_size_trait(doc, "seed_size", "seed")
 
-    rec.seed_length = get_size_dim(size, text, "length")
-    rec.seed_width = get_size_dim(size, text, "width")
+    rec.traits.seed_length = get_size_dim(size, text, "length")
+    rec.traits.seed_width = get_size_dim(size, text, "width")
 
 
-def fruits(key, text, rec: Example):
+def fruits(key, text, rec: Instance):
     key_doc = PIPELINE(key)
     doc = PIPELINE(text)
     key_type = vocab_hits(key_doc, "fruit_type")
     fruit_type = vocab_hits(doc, "fruit_type")
 
-    rec.fruit_type = key_type
-    rec.fruit_type += " " if key_type and fruit_type else ""
-    rec.fruit_type += fruit_type
+    rec.traits.fruit_type = key_type
+    rec.traits.fruit_type += " " if key_type and fruit_type else ""
+    rec.traits.fruit_type += fruit_type
 
     size = get_size_trait(doc, "fruit_size", "fruit")
 
-    rec.fruit_length = get_size_dim(size, text, "length")
-    rec.fruit_width = get_size_dim(size, text, "width")
+    rec.traits.fruit_length = get_size_dim(size, text, "length")
+    rec.traits.fruit_width = get_size_dim(size, text, "width")
 
 
-def phenology(info, rec: Example):
+def phenology(info, rec: Instance):
     value = info.get("Phenology", "")
     value = re.sub(r"[.]$", "", value)
-    rec.phenology = value
+    rec.traits.phenology = value
 
 
-def habitat(info, rec: Example):
-    rec.habitat = info.get("Habitat", "")
+def habitat(info, rec: Instance):
+    rec.traits.habitat = info.get("Habitat", "")
 
 
-def elevation(info, rec: Example):
+def elevation(info, rec: Instance):
     text = info.get("Elevation", "")
     doc = PIPELINE(text)
     size = get_size_trait(doc, "", "")
-    rec.elevation = get_size_dim(size, text, "length")
+    rec.traits.elevation = get_size_dim(size, text, "length")
 
 
 PARSE = {

@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field, fields, make_dataclass
 
 import dspy
-from Levenshtein import ratio
+import Levenshtein
+from pydantic import BaseModel
 from rich import print as rprint
 
 PROMPT = """
@@ -15,7 +16,7 @@ PROMPT = """
 
 
 @dataclass
-class Traits:
+class Traits(BaseModel):
     plant_height: str = ""
     leaf_shape: str = ""
     leaf_length: str = ""
@@ -32,20 +33,6 @@ class Traits:
     elevation: str = ""
 
 
-@dataclass
-class Example(Traits):
-    taxon: str = ""
-    text: str = ""
-
-    @classmethod
-    def dict_to_example(cls, dct):
-        example = cls()
-        for fld in fields(cls):
-            fld = fld.name
-            setattr(example, fld, dct.get(fld, ""))
-        return example
-
-
 # I don't want to type in all of the trait fields again just to change the type to float
 TraitScores = make_dataclass(
     "TraitScores",
@@ -54,7 +41,23 @@ TraitScores = make_dataclass(
 
 
 @dataclass
-class Score:
+class Instance(BaseModel):
+    taxon: str = ""
+    text: str = ""
+    traits: Traits = field(default_factory=Traits)
+
+    @classmethod
+    def dict_to_instance(cls, dct):
+        """Create an instance object from a dict, typically gotten from a JSON file."""
+        instance = cls(taxon=dct["taxon"], text=dct["text"])
+        for fld in fields(Traits):
+            fld = fld.name
+            setattr(instance.traits, fld, dct.get("traits", {}).get(fld, ""))
+        return instance
+
+
+@dataclass
+class Score(BaseModel):
     taxon: str = ""
     text: str = ""
     total_score: float = 0.0
@@ -63,18 +66,19 @@ class Score:
     scores: TraitScores = field(default_factory=TraitScores)  # type: ignore [reportGeneralTypeIssues]
 
     @classmethod
-    def score_example(cls, example, preds):
-        score = cls(taxon=example.taxon)
+    def score_instance(cls, *, instance: Instance, predictions: Traits):
+        """Create a score object from an instance object and LM predictions."""
+        score = cls(taxon=instance.taxon)
 
         flds = [fld.name for fld in fields(Traits)]
         for fld in flds:
-            true = getattr(example, fld)
-            pred = getattr(preds, fld)
+            true = getattr(instance.traits, fld)
+            pred = getattr(predictions, fld)
 
             setattr(score.trues, fld, true)
             setattr(score.preds, fld, pred)
 
-            value = ratio(true, pred)
+            value = Levenshtein.ratio(true, pred)
             setattr(score.scores, fld, value)
             score.total_score += value
 
@@ -95,19 +99,35 @@ class Score:
                 rprint(f"[red]{fld}: {true} [/red]!= [yellow]{pred}")
         rprint(f"[blue]Score = {(self.total_score * 100.0):6.2f}")
 
-    @staticmethod
-    def summary(scores: list):
-        rprint("\n[blue]Score summary:\n")
-        count = float(len(scores))
-        flds = [fld.name for fld in fields(Traits)]
-        for fld in flds:
-            score: float = sum(getattr(s.scores, fld) for s in scores)
-            rprint(f"[blue]{fld + ':':<16} {score / count * 100.0:6.2f}")
-        total_score = sum(s.total_score for s in scores) / count * 100.0
-        rprint(f"\n[blue]{'Total Score:':<16} {total_score:6.2f}\n")
+
+def score_prediction(example: dspy.Example, prediction: dspy.Prediction, trace=None):
+    """Score predictions from DSPy."""
+    total_score: float = 0.0
+
+    flds = [fld.name for fld in fields(Traits)]
+    for fld in flds:
+        true = getattr(example.traits, fld)
+        pred = getattr(prediction.traits, fld)
+
+        value = Levenshtein.ratio(true, pred)
+        total_score += value
+
+    total_score /= len(flds)
+    return total_score
 
 
-class ExtractInfo(dspy.Signature):
+def summarize_scores(scores: list[Score]) -> None:
+    rprint("\n[blue]Score summary:\n")
+    count = float(len(scores))
+    flds = [fld.name for fld in fields(Traits)]
+    for fld in flds:
+        score: float = sum(getattr(s.scores, fld) for s in scores)
+        rprint(f"[blue]{fld + ':':<16} {score / count * 100.0:6.2f}")
+    total_score = sum(s.total_score for s in scores) / count * 100.0
+    rprint(f"\n[blue]{'Total Score:':<16} {total_score:6.2f}\n")
+
+
+class TraitExtractor(dspy.Signature):
     """Analyze species descriptions and extract trait information."""
 
     text: str = dspy.InputField(desc="the species description text")
