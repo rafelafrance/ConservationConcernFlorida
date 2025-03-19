@@ -2,7 +2,6 @@ from dataclasses import dataclass, field, fields, make_dataclass
 
 import dspy
 import Levenshtein
-from pydantic import BaseModel
 from rich import print as rprint
 
 PROMPT = """
@@ -16,7 +15,7 @@ PROMPT = """
 
 
 @dataclass
-class Traits(BaseModel):
+class Traits:
     plant_height: str = ""
     leaf_shape: str = ""
     leaf_length: str = ""
@@ -33,15 +32,18 @@ class Traits(BaseModel):
     elevation: str = ""
 
 
-# I don't want to type in all of the trait fields again just to change the type to float
+TRAIT_FIELDS = [f.name for f in fields(Traits)]
+
+
+# I don't want to copy the trait fields just to change the type to float
 TraitScores = make_dataclass(
     "TraitScores",
-    [(f.name, float, field(default=0.0)) for f in fields(Traits)],
+    [(f, float, field(default=0.0)) for f in TRAIT_FIELDS],
 )
 
 
 @dataclass
-class Instance(BaseModel):
+class Instance:
     taxon: str = ""
     text: str = ""
     traits: Traits = field(default_factory=Traits)
@@ -50,14 +52,13 @@ class Instance(BaseModel):
     def dict_to_instance(cls, dct):
         """Create an instance object from a dict, typically gotten from a JSON file."""
         instance = cls(taxon=dct["taxon"], text=dct["text"])
-        for fld in fields(Traits):
-            fld = fld.name
+        for fld in TRAIT_FIELDS:
             setattr(instance.traits, fld, dct.get("traits", {}).get(fld, ""))
         return instance
 
 
 @dataclass
-class Score(BaseModel):
+class Score:
     taxon: str = ""
     text: str = ""
     total_score: float = 0.0
@@ -70,8 +71,7 @@ class Score(BaseModel):
         """Create a score object from an instance object and LM predictions."""
         score = cls(taxon=instance.taxon)
 
-        flds = [fld.name for fld in fields(Traits)]
-        for fld in flds:
+        for fld in TRAIT_FIELDS:
             true = getattr(instance.traits, fld)
             pred = getattr(predictions, fld)
 
@@ -82,13 +82,12 @@ class Score(BaseModel):
             setattr(score.scores, fld, value)
             score.total_score += value
 
-        score.total_score /= len(flds)
+        score.total_score /= len(TRAIT_FIELDS)
 
         return score
 
     def display(self):
-        flds = [fld.name for fld in fields(Traits)]
-        for fld in flds:
+        for fld in TRAIT_FIELDS:
             true = getattr(self.trues, fld)
             pred = getattr(self.preds, fld)
             true_folded = true.casefold()
@@ -104,23 +103,21 @@ def score_prediction(example: dspy.Example, prediction: dspy.Prediction, trace=N
     """Score predictions from DSPy."""
     total_score: float = 0.0
 
-    flds = [fld.name for fld in fields(Traits)]
-    for fld in flds:
+    for fld in TRAIT_FIELDS:
         true = getattr(example.traits, fld)
         pred = getattr(prediction.traits, fld)
 
         value = Levenshtein.ratio(true, pred)
         total_score += value
 
-    total_score /= len(flds)
+    total_score /= len(TRAIT_FIELDS)
     return total_score
 
 
 def summarize_scores(scores: list[Score]) -> None:
     rprint("\n[blue]Score summary:\n")
     count = float(len(scores))
-    flds = [fld.name for fld in fields(Traits)]
-    for fld in flds:
+    for fld in TRAIT_FIELDS:
         score: float = sum(getattr(s.scores, fld) for s in scores)
         rprint(f"[blue]{fld + ':':<16} {score / count * 100.0:6.2f}")
     total_score = sum(s.total_score for s in scores) / count * 100.0
@@ -130,6 +127,6 @@ def summarize_scores(scores: list[Score]) -> None:
 class TraitExtractor(dspy.Signature):
     """Analyze species descriptions and extract trait information."""
 
-    text: str = dspy.InputField(desc="the species description text")
-    prompt: str = dspy.InputField(desc="extract these traits")
-    traits: Traits = dspy.OutputField(desc="the extracted traits")
+    text: str = dspy.InputField(desc="The species description text")
+    prompt: str = dspy.InputField(desc="Extract these traits")
+    traits: Traits = dspy.OutputField(desc="The extracted traits")

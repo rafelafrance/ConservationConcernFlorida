@@ -21,7 +21,6 @@ dependencies = [
     "pandas",
     "pillow",
     "playwright",
-    "pydantic",
     "regex",
     "rich",
     "spacy",
