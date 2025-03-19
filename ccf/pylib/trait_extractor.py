@@ -48,7 +48,7 @@ TRAIT_FIELDS = [
 
 def dict2example(dct: dict[str, str]) -> dspy.Example:
     example = dspy.Example(
-        text=dct["text"], family=dct["family"], taxon=dct["taxon"], prompt=PROMPT
+        family=dct["family"], taxon=dct["taxon"], text=dct["text"], prompt=PROMPT
     ).with_inputs("family", "taxon", "text", "prompt")
 
     for fld in TRAIT_FIELDS:
