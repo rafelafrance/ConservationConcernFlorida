@@ -4,13 +4,12 @@ import argparse
 import json
 import re
 import textwrap
-from dataclasses import asdict
 from pathlib import Path
 
 import ftfy
 from bs4 import BeautifulSoup
 from pylib import log, pipeline
-from pylib.lm_data import Instance
+from pylib.trait_extractor import TraitExtractor
 from rules.size import Size
 from tqdm import tqdm
 
@@ -36,7 +35,8 @@ def main(args):
         taxon = page.stem.replace("_", " ")
         taxon = taxon[0].upper() + taxon[1:]
 
-        rec = Instance(
+        rec = TraitExtractor(
+            family=args.family.title(),
             taxon=clean(taxon).replace("×", "x "),
             text=treatment_text + info_text(info),
         )
@@ -52,7 +52,9 @@ def main(args):
         habitat(info, rec)
         elevation(info, rec)
 
-        records.append(asdict(rec))
+        record = {k: v for k, v in rec.model_dump().items() if k != "prompt"}
+
+        records.append(record)
 
     with args.out_json.open("w") as f:
         json.dump(records, f, indent=4)
@@ -136,65 +138,65 @@ def vocab_hits(doc, trait: str) -> str:
     return value
 
 
-def plants(_key, text, rec: Instance):
+def plants(_key, text, rec: TraitExtractor):
     doc = PIPELINE(text)
-    rec.traits.deciduousness = vocab_hits(doc, "leaf_duration")
+    rec.deciduousness = vocab_hits(doc, "leaf_duration")
 
     size = get_size_trait(doc, "", "")
-    rec.traits.plant_height = get_size_dim(size, text, "length")
+    rec.plant_height = get_size_dim(size, text, "length")
 
 
-def leaves(_key, text, rec: Instance):
+def leaves(_key, text, rec: TraitExtractor):
     doc = PIPELINE(text)
 
-    rec.traits.leaf_shape = vocab_hits(doc, "shape")
+    rec.leaf_shape = vocab_hits(doc, "shape")
 
     size = get_size_trait(doc, "leaf_size", "leaf")
 
-    rec.traits.leaf_length = get_size_dim(size, text, "length")
-    rec.traits.leaf_width = get_size_dim(size, text, "width")
-    rec.traits.leaf_thickness = get_size_dim(size, text, "thickness")
+    rec.leaf_length = get_size_dim(size, text, "length")
+    rec.leaf_width = get_size_dim(size, text, "width")
+    rec.leaf_thickness = get_size_dim(size, text, "thickness")
 
 
-def seeds(_key, text, rec: Instance):
+def seeds(_key, text, rec: TraitExtractor):
     doc = PIPELINE(text)
     size = get_size_trait(doc, "seed_size", "seed")
 
-    rec.traits.seed_length = get_size_dim(size, text, "length")
-    rec.traits.seed_width = get_size_dim(size, text, "width")
+    rec.seed_length = get_size_dim(size, text, "length")
+    rec.seed_width = get_size_dim(size, text, "width")
 
 
-def fruits(key, text, rec: Instance):
+def fruits(key, text, rec: TraitExtractor):
     key_doc = PIPELINE(key)
     doc = PIPELINE(text)
     key_type = vocab_hits(key_doc, "fruit_type")
     fruit_type = vocab_hits(doc, "fruit_type")
 
-    rec.traits.fruit_type = key_type
-    rec.traits.fruit_type += " " if key_type and fruit_type else ""
-    rec.traits.fruit_type += fruit_type
+    rec.fruit_type = key_type
+    rec.fruit_type += " " if key_type and fruit_type else ""
+    rec.fruit_type += fruit_type
 
     size = get_size_trait(doc, "fruit_size", "fruit")
 
-    rec.traits.fruit_length = get_size_dim(size, text, "length")
-    rec.traits.fruit_width = get_size_dim(size, text, "width")
+    rec.fruit_length = get_size_dim(size, text, "length")
+    rec.fruit_width = get_size_dim(size, text, "width")
 
 
-def phenology(info, rec: Instance):
+def phenology(info, rec: TraitExtractor):
     value = info.get("Phenology", "")
     value = re.sub(r"[.]$", "", value)
-    rec.traits.phenology = value
+    rec.phenology = value
 
 
-def habitat(info, rec: Instance):
-    rec.traits.habitat = info.get("Habitat", "")
+def habitat(info, rec: TraitExtractor):
+    rec.habitat = info.get("Habitat", "")
 
 
-def elevation(info, rec: Instance):
+def elevation(info, rec: TraitExtractor):
     text = info.get("Elevation", "")
     doc = PIPELINE(text)
     size = get_size_trait(doc, "", "")
-    rec.traits.elevation = get_size_dim(size, text, "length")
+    rec.elevation = get_size_dim(size, text, "length")
 
 
 PARSE = {
@@ -279,6 +281,13 @@ def parse_args():
         description=textwrap.dedent(
             "Make LM training data from downloaded HTML files."
         ),
+    )
+
+    arg_parser.add_argument(
+        "--family",
+        required=True,
+        metavar="FAMILY",
+        help="""The taxa are a part of this family.""",
     )
 
     arg_parser.add_argument(

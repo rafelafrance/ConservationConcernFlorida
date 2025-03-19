@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
 import textwrap
 from pathlib import Path
 
 import dspy
 from pylib import log
-from pylib.lm_data import PROMPT, Instance, Score, TraitExtractor, summarize_scores
+from pylib import track_scores as ts
+from pylib import trait_extractor as te
 from rich import print as rprint
 
 # from pprint import pp
@@ -16,36 +16,41 @@ from rich import print as rprint
 def main(args):
     log.started()
 
-    with args.examples.open() as f:
-        example_data = json.load(f)
+    examples = te.read_examples(args.examples_json)
+    examples = examples[: args.limit] if args.limit else examples
 
-    instances = [Instance.dict_to_instance(d) for d in example_data]
-
-    lm = dspy.LM(args.model, api_base=args.api_base, api_key=args.api_key)
+    lm = dspy.LM(
+        args.model, api_base=args.api_base, api_key=args.api_key, cache=args.no_cache
+    )
     dspy.configure(lm=lm)
 
-    trait_extractor = dspy.Predict(TraitExtractor)
+    trait_extractor = dspy.Predict(te.TraitExtractor)
     # trait_extractor = dspy.ChainOfThought(TraitExtractor)
 
     scores = []
 
-    instances = instances[: args.limit] if args.limit else instances
-
-    for i, instance in enumerate(instances, 1):
+    for i, example in enumerate(examples, 1):
         rprint(f"[blue]{'=' * 80}")
-        rprint(f"[blue]{i} {instance.taxon}")
+        rprint(f"[blue]{i} {example.family}")
+        rprint(f"[blue]{i} {example.taxon}")
 
         print()
-        rprint(f"[blue]{instance.text}")
+        rprint(f"[blue]{example.text}")
         print()
 
-        pred = trait_extractor(text=instance.text, prompt=PROMPT)
+        pred = trait_extractor(
+            family=example.family,
+            taxon=example.taxon,
+            text=example.text,
+            prompt=te.PROMPT,
+        )
 
-        score = Score.score_instance(instance=instance, predictions=pred.traits)
+        score = ts.TrackScores.track_scores(example=example, prediction=pred)
         score.display()
+
         scores.append(score)
 
-    summarize_scores(scores)
+    ts.TrackScores.summarize_scores(scores)
 
     log.finished()
 
@@ -57,7 +62,7 @@ def parse_args():
     )
 
     arg_parser.add_argument(
-        "--examples",
+        "--examples-json",
         type=Path,
         required=True,
         metavar="PATH",
@@ -86,6 +91,12 @@ def parse_args():
         type=int,
         default=0,
         help="""Limit to this many input examples.""",
+    )
+
+    arg_parser.add_argument(
+        "--no-cache",
+        action="store_false",
+        help="""Turn off caching for the model.""",
     )
 
     args = arg_parser.parse_args()
