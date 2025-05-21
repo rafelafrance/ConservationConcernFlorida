@@ -16,9 +16,9 @@ TIMEOUT = 2  # Wait this many seconds for the page to load
 
 BASE_URL = "http://floranorthamerica.org"
 
-QUERY = """
-    [[Taxon family::Asteraceae]][[Taxon rank::species]][[Distribution::Fla.]]
-    """
+# QUERY = """
+#     [[Taxon family::Asteraceae]][[Taxon rank::species]][[Distribution::Fla.]]
+#     """
 
 
 def main(args):
@@ -69,7 +69,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
 def get_target_taxa(target_taxa_csv: Path) -> list[str]:
     with target_taxa_csv.open() as f:
         reader = csv.DictReader(f)
-        targets = {r["taxon"] for r in reader}
+        targets = {r["parentTaxon"] for r in reader}
     return sorted(targets)
 
 

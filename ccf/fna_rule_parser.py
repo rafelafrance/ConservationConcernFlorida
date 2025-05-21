@@ -52,9 +52,10 @@ def main(args):
                 func(key, text, rec)
 
         info = get_info(soup)
-        phenology(info, rec)
-        habitat(info, rec)
-        elevation(info, rec)
+        if info:
+            phenology(info, rec)
+            habitat(info, rec)
+            elevation(info, rec)
 
         records.append(rec)
 
@@ -78,7 +79,10 @@ def get_treatment(soup):
 
 
 def get_info(soup):
-    info = soup.find("div", class_="treatment-info").find_all(string=True)
+    info = soup.find("div", class_="treatment-info")
+    if not info:
+        return None
+    info = info.find_all(string=True)
     info = [clean(x) for i in info if (x := i.strip()) and i.find(":") > -1]
     info = {i.split(":")[0].strip(): i.split(":")[1].strip() for i in info}
     return info
@@ -252,60 +256,95 @@ PARSE = {
     "Subshrubs": plants,
     "Subshrubs,": plants,
     # Leaves
+    "Blades": leaves,
+    "Cauline": leaves,
+    "Foliage": leaves,
     "Leaf": leaves,
     "Leaves": leaves,
     "Leaves:": leaves,
-    "Cauline": leaves,
+    "Sessile": leaves,
+    "Topknots": leaves,
     # Fruits
-    "Fruits": fruits,
+    "Achenes": fruits,
+    "Caryopses": fruits,
     "Cypselae": fruits,
+    "Fruits": fruits,
+    "Pappi": fruits,
     # Seeds
     "Seeds": seeds,
     # Unused
     "2n": None,
     "Aerial": None,
+    "Anthers": None,
+    "Anthesis": None,
     "Arrays": None,
     "Basal": None,
     "Bisexual": None,
     "Bracts": None,
     "Burs": None,
+    "Callus": None,
+    "Calluses": None,
     "Calyculi": None,
+    "Central": None,
+    "Cialdella": None,
     "Corms": None,
     "Corollas": None,
+    "Culm": None,
+    "Culms": None,
     "Dioecious.": None,
     "Disc": None,
     "Discs": None,
+    "Fertile": None,
     "Florets": None,
     "Functionally": None,
+    "Glumes": None,
     "Heads": None,
     "Herbage": None,
+    "Inflorescence": None,
+    "Inflorescences": None,
     "Inner": None,
     "Innermost": None,
     "Internodes": None,
     "Involucres": None,
+    "Lateral": None,
+    "Lemmas": None,
+    "Ligules": None,
+    "Lower": None,
     "Outer": None,
     "Ovaries": None,
     "Paleae": None,
-    "Pappi": None,
+    "Panicles": None,
+    "Pedicellate": None,
+    "Pedicels": None,
     "Peduncle": None,
     "Peduncles": None,
     "Petioles": None,
     "Phyllaries": None,
     "Phyllary": None,
     "Pistillate": None,
+    "Primary": None,
     "Principal": None,
+    "Rames": None,
     "Ray": None,
     "Rays": None,
     "Receptacles": None,
     "Receptacular": None,
+    "Rhizomes": None,
+    "Sheaths": None,
+    "Spikelets": None,
+    "Spikes": None,
     "Staminate": None,
     "Stem": None,
     "Stems": None,
     "Stolons": None,
     "Style": None,
+    "Subterranean": None,
     "Taproots": None,
+    "Terminal": None,
+    "Upper": None,
     "Weak": None,
     "Winter": None,
+    "Wipff": None,  # WTF?
 }
 
 

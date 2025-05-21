@@ -8,12 +8,14 @@ from pathlib import Path
 
 import ftfy
 from bs4 import BeautifulSoup
+from fna_rule_parser import PARSE
 
 
 def main(args):
     pages = sorted(args.html_dir.glob("*.html"))
 
     all_keys = defaultdict(list)
+    all_pages = defaultdict(list)
 
     for page in pages:
         with page.open() as f:
@@ -25,13 +27,22 @@ def main(args):
 
         for key, value in treat.items():
             all_keys[key].append(value)
+            all_pages[key].append(page.stem)
+
+    missing_keys = {k: v for k, v in all_keys.items() if k not in PARSE}
+    missing_keys = dict(sorted(missing_keys.items()))
 
     print()
-    for key, taxon in dict(sorted(all_keys.items())).items():
+    for key, taxon in missing_keys.items():
         # print(f'"{key}": None,')
         print(f"{key:<12} {taxon[:4]}")
+        print(f"{'':<12} {all_pages[key][:3]}")
         print()
     print()
+    for key in missing_keys:
+        print(f'"{key}": None,')
+    print()
+    print(f"All keys {len(all_keys)}, missing keys {len(missing_keys)}")
 
 
 def get_treatment(soup):
@@ -68,7 +79,7 @@ def parse_args():
         type=Path,
         required=True,
         metavar="PATH",
-        help="""Get keys from treatments in HTML files in this directory.""",
+        help="""Parse HTML files in this directory.""",
     )
 
     args = arg_parser.parse_args()
