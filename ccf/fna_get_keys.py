@@ -18,6 +18,7 @@ def main(args):
     all_pages = defaultdict(list)
 
     for page in pages:
+        print(page.stem)
         with page.open() as f:
             text = f.read()
 
