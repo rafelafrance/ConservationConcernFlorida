@@ -35,8 +35,7 @@ def main(args):
 
     print()
     for key, taxon in missing_keys.items():
-        # print(f'"{key}": None,')
-        print(f"{key:<12} {taxon[:4]}")
+        print(f"{key:<12} {taxon[:]}")
         print(f"{'':<12} {all_pages[key][:3]}")
         print()
     print()
@@ -52,6 +51,7 @@ def get_treatment(soup):
         return {}
 
     text = str(treat).replace("<i>", "").replace("</i>", "")
+    text = re.sub(r"(Perennials|Annuals|Biennials);", r"<b>\1</b>", text)
     text = clean(text)
 
     soup2 = BeautifulSoup(text, features="lxml")

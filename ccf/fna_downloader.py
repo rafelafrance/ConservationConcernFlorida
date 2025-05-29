@@ -4,6 +4,7 @@ import argparse
 import csv
 import textwrap
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError
 
@@ -21,6 +22,20 @@ BASE_URL = "http://floranorthamerica.org"
 #     """
 
 
+@dataclass
+class Taxon:
+    family: str
+    species: str
+
+    @property
+    def name(self):
+        return self.species.replace(" ", "_")
+
+    @property
+    def stem(self):
+        return self.family + "_" + self.name
+
+
 def main(args):
     log.started()
 
@@ -29,10 +44,9 @@ def main(args):
     taxa = get_target_taxa(args.taxon_csv)
 
     for i, taxon in enumerate(taxa, 1):
-        print(i, taxon)
-        name = taxon.replace(" ", "_")
-        url = BASE_URL + f"/{name}"
-        path = args.html_dir / f"{name}.html"
+        print(i, taxon.family, taxon.species)
+        url = BASE_URL + f"/{taxon.name}"
+        path = args.html_dir / f"{taxon.stem}.html"
         download(path, url)
 
     log.finished()
@@ -66,11 +80,11 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
             time.sleep(attempt * TIMEOUT)
 
 
-def get_target_taxa(target_taxa_csv: Path) -> list[str]:
+def get_target_taxa(target_taxa_csv: Path) -> list[Taxon]:
     with target_taxa_csv.open() as f:
         reader = csv.DictReader(f)
-        targets = {r["parentTaxon"] for r in reader}
-    return sorted(targets)
+        targets = [Taxon(r["Family"], r["parentTaxon"]) for r in reader]
+    return targets
 
 
 def parse_args():

@@ -33,6 +33,7 @@ def main(args):
     records = []
 
     for page in tqdm(pages):
+        # print(page.stem)
         with page.open() as f:
             text = f.read()
 
@@ -70,6 +71,7 @@ def get_treatment(soup):
         return {}
 
     text = str(treat).replace("<i>", "").replace("</i>", "")
+    text = re.sub(r"(Perennials|Annuals|Biennials);", r"<b>\1</b>", text)
     text = clean(text)
 
     soup2 = BeautifulSoup(text, features="lxml")
@@ -147,8 +149,8 @@ def leaves(_key, text, rec):
     rec["leaf_length_min_cm"] = length.min
     rec["leaf_length_low_cm"] = length.low
     rec["leaf_length_high_cm"] = length.high
-
     rec["leaf_length_max_cm"] = length.max
+
     rec["leaf_width_min_cm"] = width.min
     rec["leaf_width_low_cm"] = width.low
     rec["leaf_width_high_cm"] = width.high
@@ -239,40 +241,67 @@ def get_terms():
 
 PARSE = {
     # Plants
+    "Culm": plants,
+    "Culms": plants,
     "Annual": plants,
     "Annual,": plants,
     "Annuals": plants,
     "Annuals,": plants,
+    "Annuals.": plants,
     "Biennial": plants,
     "Biennials": plants,
     "Biennials,": plants,
-    "Culm": plants,
-    "Culms": plants,
+    "Herb": plants,
+    "Herb,": plants,
+    "Herbage": plants,
+    "Herbs": plants,
+    "Herbs,": plants,
+    "Herbs.": plants,
+    "Herbs:": plants,
     "Perennial": plants,
     "Perennials": plants,
     "Perennials,": plants,
     "Perennials.": plants,
+    "Plant": plants,
     "Plants": plants,
     "Shrubs": plants,
     "Shrubs,": plants,
     "Subshrubs": plants,
     "Subshrubs,": plants,
+    "Subshrubs.": plants,
+    "Trees": plants,
+    "Trees,": plants,
     # Leaves
     "Blades": leaves,
-    "Cauline": leaves,
-    "Foliage": leaves,
+    "Sheaths": leaves,
     "Leaf": leaves,
     "Leaves": leaves,
     "Leaves:": leaves,
     "Sessile": leaves,
+    "Foliage": leaves,
+    "Cauline": leaves,
+    "Fronds": leaves,
     "Topknots": leaves,
     # Fruits
+    "Fruits": fruits,
+    "Fruiting": fruits,
+    "Acorns": fruits,
     "Achene": fruits,
     "Achenes": fruits,
+    "Berries": fruits,
+    "Capsules": fruits,
+    "Capules": fruits,
     "Caryopses": fruits,
     "Cypselae": fruits,
-    "Fruits": fruits,
+    "Drupes": fruits,
+    "Loments": fruits,
+    "Legumes": fruits,
+    "Mericarps": fruits,
+    "Pappi": fruits,
+    "Pomes": fruits,
+    "Schizocarps": fruits,
     # Seeds
+    "Seed": seeds,
     "Seeds": seeds,
     # Unused
     "2n": None,
@@ -300,10 +329,6 @@ PARSE = {
     "Functionally": None,
     "Glumes": None,
     "Heads": None,
-    "Herb,": None,
-    "Herbage": None,
-    "Herbs": None,
-    "Herbs,": None,
     "Inflorescence": None,
     "Inflorescences": None,
     "Inflorescnecs": None,
@@ -319,7 +344,6 @@ PARSE = {
     "Ovaries": None,
     "Paleae": None,
     "Panicles": None,
-    "Pappi": None,
     "Pedicellate": None,
     "Pedicels": None,
     "Peduncle": None,
@@ -339,7 +363,6 @@ PARSE = {
     "Receptacular": None,
     "Rhizomes": None,
     "Scales": None,
-    "Sheaths": None,
     "Spike": None,
     "Spikelets": None,
     "Spikes": None,
@@ -358,7 +381,73 @@ PARSE = {
     "Upper": None,
     "Weak": None,
     "Winter": None,
-    "Wipff": None,  # WTF?
+    "Wipff": None,
+    "Bark": None,
+    "Barneby": None,
+    "Both": None,
+    "Bracteoles": None,
+    "Buds": None,
+    "Bulb": None,
+    "Bulbs": None,
+    "Calyces": None,
+    "Cataphylls": None,
+    "Chasmogamous": None,
+    "Chromosome": None,
+    "Cleistogamous": None,
+    "Coty": None,
+    "Cotyledons": None,
+    "Cyathia": None,
+    "Cyathial": None,
+    "Dietrich": None,
+    "Duffield": None,
+    "Fla": None,
+    "Floral": None,
+    "Flow": None,
+    "Fol": None,
+    "Follicles": None,
+    "Friesner": None,
+    "Glomes": None,
+    "Green": None,
+    "Hips": None,
+    "In": None,
+    "Inflo": None,
+    "Inflores": None,
+    "Infructescences": None,
+    "Involucellar": None,
+    "Involucre": None,
+    "Irwin": None,
+    "Latex": None,
+    "Leaflets": None,
+    "Lianas": None,
+    "Marazzi": None,
+    "Mature": None,
+    "Oenothera": None,
+    "Pedi": None,
+    "Pseudobulbs": None,
+    "Racemes": None,
+    "Rhizomal": None,
+    "Rhizome": None,
+    "Roots": None,
+    "Scape": None,
+    "Scapes": None,
+    "Senna": None,
+    "Spathe": None,
+    "Stamens": None,
+    "Stipes": None,
+    "Subspecies": None,
+    "The": None,
+    "Three": None,
+    "Thyrses": None,
+    "Twigs": None,
+    "Umbel": None,
+    "Umbels": None,
+    "Utricles": None,
+    "Variety": None,
+    "Vines": None,
+    "Vines,": None,
+    "Wagner": None,
+    "Woody": None,
+    "Xylopodium:": None,
 }
 
 
