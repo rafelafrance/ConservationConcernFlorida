@@ -1,5 +1,5 @@
 import spacy
-from traiter.pylib.pipes import extensions, tokenizer
+from traiter.pipes import extensions, tokenizer
 
 from ccf.rules.fruit_size import FruitSize
 from ccf.rules.fruit_type import FruitType

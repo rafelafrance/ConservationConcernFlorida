@@ -3,11 +3,10 @@ from dataclasses import dataclass
 
 from spacy import registry
 from spacy.language import Language
+from traiter.pipes import add
 from traiter.pylib import const as t_const
-from traiter.pylib.darwin_core import DarwinCore
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add
-from traiter.pylib.rules.base import Base
+from traiter.rules.base import Base
 
 
 @dataclass(eq=False)
@@ -16,9 +15,6 @@ class Range(Base):
     low: float = None
     high: float = None
     max: float = None
-
-    def to_dwc(self, dwc) -> DarwinCore:
-        ...
 
     @classmethod
     def pipe(cls, nlp: Language):
@@ -37,8 +33,6 @@ class Range(Base):
         return [
             Compiler(
                 label="range.low",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -47,8 +41,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.min.low",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -57,8 +49,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.low.high",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -67,8 +57,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.low.max",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -77,8 +65,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.min.low.high",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -87,8 +73,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.min.low.max",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -97,8 +81,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.low.high.max",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -107,8 +89,6 @@ class Range(Base):
             ),
             Compiler(
                 label="range.min.low.high.max",
-                id="range",
-                keep="range",
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
@@ -126,6 +106,8 @@ class Range(Base):
 
         keys = ent.label_.split(".")[1:]
         kwargs = dict(zip(keys, nums, strict=False))
+
+        ent._.relabel = "range"
 
         trait = cls.from_ent(ent, **kwargs)
 

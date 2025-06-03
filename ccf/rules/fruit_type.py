@@ -4,9 +4,9 @@ from typing import ClassVar
 
 from spacy.language import Language
 from spacy.util import registry
+from traiter.pipes import add
 from traiter.pylib import term_util
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add
 
 from ccf.rules.base import Base
 
@@ -37,7 +37,6 @@ class FruitType(Base):
             Compiler(
                 label="fruit_type",
                 on_match="fruit_type_match",
-                keep="fruit_type",
                 decoder={
                     "type": {"ENT_TYPE": "fruit_type"},
                 },

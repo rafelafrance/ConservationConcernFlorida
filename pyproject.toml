@@ -122,7 +122,7 @@ lint.ignore = [
     "PLR0913", # Too many arguments in function definition ({c_args} > {max_args})
     "PLW2901", # Outer {outer_kind} variable {name} overwritten by inner {inner_kind} target
     "PLW0603", # Using the global statement to update {name} is discouraged
-    "PT009",   # Use a regular assert instead of unittest-style {assertion}
+    "PT009",   # Use a regular assert statement instead of unittest-style {assertion}
     "RET504",  # Unnecessary assignment to {name} before return statement
     "RUF001",  # String contains ambiguous {}. Did you mean {}?
     "RUF003",  # Comment contains ambiguous "-"

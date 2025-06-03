@@ -4,8 +4,8 @@ from typing import ClassVar
 
 from spacy.language import Language
 from spacy.util import registry
+from traiter.pipes import add
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add
 
 from ccf.rules.base import Base
 
@@ -35,7 +35,6 @@ class LeafDuration(Base):
             Compiler(
                 label="leaf_duration",
                 on_match="leaf_duration_match",
-                keep="leaf_duration",
                 decoder={
                     "duration": {"ENT_TYPE": "leaf_duration"},
                 },

@@ -4,9 +4,9 @@ from typing import ClassVar
 
 from spacy.language import Language
 from spacy.util import registry
+from traiter.pipes import add
 from traiter.pylib import term_util
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add
 
 from ccf.pylib.dimension import Dimension
 from ccf.rules.base import Base
@@ -44,7 +44,6 @@ class SeedSize(Base):
         return [
             Compiler(
                 label="seed_size",
-                keep="seed_size",
                 on_match="seed_size_match",
                 decoder={
                     "seed": {"ENT_TYPE": "seed_term"},

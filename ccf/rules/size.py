@@ -4,12 +4,12 @@ from typing import ClassVar
 
 from spacy import registry
 from spacy.language import Language
+from traiter.pipes import add
 from traiter.pylib import const as t_const
 from traiter.pylib import term_util
 from traiter.pylib.pattern_compiler import Compiler
-from traiter.pylib.pipes import add
-from traiter.pylib.rules import terms as t_terms
-from traiter.pylib.rules.base import Base
+from traiter.rules import terms as t_terms
+from traiter.rules.base import Base
 
 from ccf.pylib.dimension import Dimension
 
@@ -64,7 +64,6 @@ class Size(Base):
         return [
             Compiler(
                 label="size",
-                keep="size",
                 on_match="size_match",
                 decoder=decoder,
                 patterns=[
