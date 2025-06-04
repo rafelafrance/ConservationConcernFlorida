@@ -55,22 +55,5 @@ class TestFruitSize(unittest.TestCase):
     def test_fruit_size_03(self):
         self.assertEqual(
             parse("""Beaks 2–3(–4) mm,"""),
-            [
-                FruitSize(
-                    start=0,
-                    end=16,
-                    part="beak",
-                    dims=[
-                        Dimension(
-                            dim="length",
-                            units="mm",
-                            low=2.0,
-                            high=3.0,
-                            max=4.0,
-                            start=6,
-                            end=16,
-                        )
-                    ],
-                ),
-            ],
+            [],
         )

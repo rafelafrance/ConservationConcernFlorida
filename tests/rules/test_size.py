@@ -74,3 +74,48 @@ class TestSize(unittest.TestCase):
                 ),
             ],
         )
+
+    def test_size_04(self):
+        """It handles a width only notation."""
+        self.assertEqual(
+            parse("""0.8–2.5 mm wide"""),
+            [
+                Size(
+                    dims=[
+                        Dimension(
+                            dim="width",
+                            low=0.8,
+                            high=2.5,
+                            units="mm",
+                            start=0,
+                            end=15,
+                        )
+                    ],
+                    start=0,
+                    end=15,
+                ),
+            ],
+        )
+
+    def test_size_05(self):
+        self.assertEqual(
+            parse("""(2.5-)2.8-3.5(-4.5) × 1x 1.6-2.2 mm"""),
+            [
+                Size(
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            min=2.5,
+                            low=2.8,
+                            high=3.5,
+                            max=4.5,
+                            units="mm",
+                            start=0,
+                            end=35,
+                        )
+                    ],
+                    start=0,
+                    end=35,
+                ),
+            ],
+        )

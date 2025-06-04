@@ -39,7 +39,7 @@ def main(args):
 
         soup = BeautifulSoup(text, features="lxml")
 
-        treat = get_treatment(soup)
+        treatment = get_treatment(soup)
 
         taxon = page.stem.replace("_", " ")
         taxon = taxon[0].upper() + taxon[1:]
@@ -47,10 +47,11 @@ def main(args):
 
         used = set()
 
-        for key, text in treat.items():
-            if (func := PARSE.get(key)) and func not in used:
-                used.add(func)  # Only use a parse function once
-                func(key, text, rec)
+        for key, text in treatment.items():
+            if funcs := PARSE.get(key):
+                for func in funcs:
+                    if func not in used and func(key, text, rec):
+                        used.add(func)  # Only parse a function once
 
         info = get_info(soup)
         if info:
@@ -65,19 +66,145 @@ def main(args):
     log.finished()
 
 
+def parse_treatment(rec, treatment):
+    used = set()
+
+    for key, text in treatment.items():
+        if funcs := PARSE.get(key):
+            for func in funcs:
+                if func not in used and func(key, text, rec):
+                    used.add(func)  # Only parse a function once
+
+
+def has_value(dim):
+    return any(getattr(dim, k) is not None for k in ("min", "low", "high", "max"))
+
+
+def plant_height(_key, text, rec):
+    size = get_size_trait(text, "", "")
+    size = Size.convert_units_to_cm(size)
+
+    length = get_size_dim(size, "length")
+
+    rec["plant_height_min_cm"] = length.min
+    rec["plant_height_low_cm"] = length.low
+    rec["plant_height_high_cm"] = length.high
+    rec["plant_height_max_cm"] = length.max
+
+    return has_value(length)
+
+
+def plant_deciduousness(key, text, rec):
+    rec["deciduousness"] = vocab_hits(text, DURATION, key)
+    return bool(rec["deciduousness"])
+
+
+def leaf_size(_key, text, rec):
+    size = get_size_trait(text, "leaf_size", "leaf")
+    size = Size.convert_units_to_cm(size)
+
+    length = get_size_dim(size, "length")
+    width = get_size_dim(size, "width")
+    thickness = get_size_dim(size, "thickness")
+
+    rec["leaf_length_min_cm"] = length.min
+    rec["leaf_length_low_cm"] = length.low
+    rec["leaf_length_high_cm"] = length.high
+    rec["leaf_length_max_cm"] = length.max
+
+    rec["leaf_width_min_cm"] = width.min
+    rec["leaf_width_low_cm"] = width.low
+    rec["leaf_width_high_cm"] = width.high
+    rec["leaf_width_max_cm"] = width.max
+
+    rec["leaf_thickness_min_cm"] = thickness.min
+    rec["leaf_thickness_low_cm"] = thickness.low
+    rec["leaf_thickness_high_cm"] = thickness.high
+    rec["leaf_thickness_max_cm"] = thickness.max
+
+    return has_value(length) or has_value(width) or has_value(thickness)
+
+
+def leaf_shape(_key, text, rec):
+    rec["leaf_shape"] = vocab_hits(text.lower(), SHAPES)
+    return bool(rec["leaf_shape"])
+
+
+def seed_size(_key, text, rec):
+    size = get_size_trait(text, "seed_size", "seed")
+    size = Size.convert_units_to_cm(size)
+
+    length = get_size_dim(size, "length")
+    width = get_size_dim(size, "width")
+
+    rec["seed_length_min_cm"] = length.min
+    rec["seed_length_low_cm"] = length.low
+    rec["seed_length_high_cm"] = length.high
+    rec["seed_length_max_cm"] = length.max
+
+    rec["seed_width_min_cm"] = width.min
+    rec["seed_width_low_cm"] = width.low
+    rec["seed_width_high_cm"] = width.high
+    rec["seed_width_max_cm"] = width.max
+
+    return has_value(length) or has_value(width)
+
+
+def fruit_type(key, text, rec):
+    rec["fruit_type"] = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
+    return bool(rec["fruit_type"])
+
+
+def fruit_size(_key, text, rec):
+    size = get_size_trait(text, "fruit_size", "fruit")
+    size = Size.convert_units_to_cm(size)
+
+    length = get_size_dim(size, "length")
+    width = get_size_dim(size, "width")
+
+    rec["fruit_length_min_cm"] = length.min
+    rec["fruit_length_low_cm"] = length.low
+    rec["fruit_length_high_cm"] = length.high
+    rec["fruit_length_max_cm"] = length.max
+
+    rec["fruit_width_min_cm"] = width.min
+    rec["fruit_width_low_cm"] = width.low
+    rec["fruit_width_high_cm"] = width.high
+    rec["fruit_width_max_cm"] = width.max
+
+    return has_value(length) or has_value(width)
+
+
+def phenology(info, rec):
+    rec["flowering_time"] = info.get("Phenology", "")
+
+
+def habitat(info, rec):
+    rec["habitat"] = info.get("Habitat", "")
+
+
+def elevation(info, rec):
+    text = info.get("Elevation", "")
+    size = get_size_trait(text, "", "")
+    elev = get_size_dim(size, "length")
+
+    rec["elevation_min_m"] = elev.low
+    rec["elevation_max_m"] = elev.high
+
+
 def get_treatment(soup):
-    treat = soup.find("span", class_="statement")
-    if not treat:
+    treatment = soup.find("span", class_="statement")
+    if not treatment:
         return {}
 
-    text = str(treat).replace("<i>", "").replace("</i>", "")
+    text = str(treatment).replace("<i>", "").replace("</i>", "")
     text = re.sub(r"(Perennials|Annuals|Biennials);", r"<b>\1</b>", text)
     text = clean(text)
 
     soup2 = BeautifulSoup(text, features="lxml")
     parts = [p.text.strip() for p in soup2.find_all(string=True)]
-    treat = dict(zip(parts[0::2], parts[1::2], strict=True))
-    return treat
+    treatment = dict(zip(parts[0::2], parts[1::2], strict=True))
+    return treatment
 
 
 def get_info(soup):
@@ -122,101 +249,6 @@ def vocab_hits(text, vocab, key=None):
     return " | ".join(hits.keys())
 
 
-def plants(key, text, rec):
-    rec["deciduousness"] = vocab_hits(text, DURATION, key)
-
-    size = get_size_trait(text, "", "")
-    size = Size.convert_units_to_cm(size)
-
-    length = get_size_dim(size, "length")
-
-    rec["plant_height_min_cm"] = length.min
-    rec["plant_height_low_cm"] = length.low
-    rec["plant_height_high_cm"] = length.high
-    rec["plant_height_max_cm"] = length.max
-
-
-def leaves(_key, text, rec):
-    rec["leaf_shape"] = vocab_hits(text.lower(), SHAPES)
-
-    size = get_size_trait(text, "leaf_size", "leaf")
-    size = Size.convert_units_to_cm(size)
-
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-    thickness = get_size_dim(size, "thickness")
-
-    rec["leaf_length_min_cm"] = length.min
-    rec["leaf_length_low_cm"] = length.low
-    rec["leaf_length_high_cm"] = length.high
-    rec["leaf_length_max_cm"] = length.max
-
-    rec["leaf_width_min_cm"] = width.min
-    rec["leaf_width_low_cm"] = width.low
-    rec["leaf_width_high_cm"] = width.high
-    rec["leaf_width_max_cm"] = width.max
-
-    rec["leaf_thickness_min_cm"] = thickness.min
-    rec["leaf_thickness_low_cm"] = thickness.low
-    rec["leaf_thickness_high_cm"] = thickness.high
-    rec["leaf_thickness_max_cm"] = thickness.max
-
-
-def seeds(_key, text, rec):
-    size = get_size_trait(text, "seed_size", "seed")
-    size = Size.convert_units_to_cm(size)
-
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-
-    rec["seed_length_min_cm"] = length.min
-    rec["seed_length_low_cm"] = length.low
-    rec["seed_length_high_cm"] = length.high
-    rec["seed_length_max_cm"] = length.max
-
-    rec["seed_width_min_cm"] = width.min
-    rec["seed_width_low_cm"] = width.low
-    rec["seed_width_high_cm"] = width.high
-    rec["seed_width_max_cm"] = width.max
-
-
-def fruits(key, text, rec):
-    rec["fruit_type"] = vocab_hits(text.lower(), FRUIT_TYPES, key.lower())
-
-    size = get_size_trait(text, "fruit_size", "fruit")
-    size = Size.convert_units_to_cm(size)
-
-    length = get_size_dim(size, "length")
-    width = get_size_dim(size, "width")
-
-    rec["fruit_length_min_cm"] = length.min
-    rec["fruit_length_low_cm"] = length.low
-    rec["fruit_length_high_cm"] = length.high
-    rec["fruit_length_max_cm"] = length.max
-
-    rec["fruit_width_min_cm"] = width.min
-    rec["fruit_width_low_cm"] = width.low
-    rec["fruit_width_high_cm"] = width.high
-    rec["fruit_width_max_cm"] = width.max
-
-
-def phenology(info, rec):
-    rec["flowering_time"] = info.get("Phenology", "")
-
-
-def habitat(info, rec):
-    rec["habitat"] = info.get("Habitat", "")
-
-
-def elevation(info, rec):
-    text = info.get("Elevation", "")
-    size = get_size_trait(text, "", "")
-    elev = get_size_dim(size, "length")
-
-    rec["elevation_min_m"] = elev.low
-    rec["elevation_max_m"] = elev.high
-
-
 def get_terms():
     shape_file = Path(__file__).parent / "rules" / "terms" / "shape_terms.csv"
     fruit_file = Path(__file__).parent / "rules" / "terms" / "fruit_terms.csv"
@@ -241,109 +273,153 @@ def get_terms():
 
 PARSE = {
     # Plants
-    "Culm": plants,
-    "Culms": plants,
-    "Annual": plants,
-    "Annual,": plants,
-    "Annuals": plants,
-    "Annuals,": plants,
-    "Annuals.": plants,
-    "Biennial": plants,
-    "Biennials": plants,
-    "Biennials,": plants,
-    "Herb": plants,
-    "Herb,": plants,
-    "Herbage": plants,
-    "Herbs": plants,
-    "Herbs,": plants,
-    "Herbs.": plants,
-    "Herbs:": plants,
-    "Perennial": plants,
-    "Perennials": plants,
-    "Perennials,": plants,
-    "Perennials.": plants,
-    "Plant": plants,
-    "Plants": plants,
-    "Shrubs": plants,
-    "Shrubs,": plants,
-    "Subshrubs": plants,
-    "Subshrubs,": plants,
-    "Subshrubs.": plants,
-    "Trees": plants,
-    "Trees,": plants,
+    "Culm": (plant_height, plant_deciduousness),
+    "Culms": (plant_height, plant_deciduousness),
+    "Annual": (plant_height, plant_deciduousness),
+    "Annual,": (plant_height, plant_deciduousness),
+    "Annuals": (plant_height, plant_deciduousness),
+    "Annuals,": (plant_height, plant_deciduousness),
+    "Annuals.": (plant_height, plant_deciduousness),
+    "Biennial": (plant_height, plant_deciduousness),
+    "Biennials": (plant_height, plant_deciduousness),
+    "Biennials,": (plant_height, plant_deciduousness),
+    "Herb": (plant_height, plant_deciduousness),
+    "Herb,": (plant_height, plant_deciduousness),
+    "Herbage": (plant_height, plant_deciduousness),
+    "Herbs": (plant_height, plant_deciduousness),
+    "Herbs,": (plant_height, plant_deciduousness),
+    "Herbs.": (plant_height, plant_deciduousness),
+    "Herbs:": (plant_height, plant_deciduousness),
+    "Perennial": (plant_height, plant_deciduousness),
+    "Perennials": (plant_height, plant_deciduousness),
+    "Perennials,": (plant_height, plant_deciduousness),
+    "Perennials.": (plant_height, plant_deciduousness),
+    "Plant": (plant_height, plant_deciduousness),
+    "Plants": (plant_height, plant_deciduousness),
+    "Shrubs": (plant_height, plant_deciduousness),
+    "Shrubs,": (plant_height, plant_deciduousness),
+    "Subshrubs": (plant_height, plant_deciduousness),
+    "Subshrubs,": (plant_height, plant_deciduousness),
+    "Subshrubs.": (plant_height, plant_deciduousness),
+    "Trees": (plant_height, plant_deciduousness),
+    "Trees,": (plant_height, plant_deciduousness),
+    "Vines": (plant_height, plant_deciduousness),
+    "Vines,": (plant_height, plant_deciduousness),
+    "Winter": (plant_height, plant_deciduousness),
     # Leaves
-    "Blades": leaves,
-    "Sheaths": leaves,
-    "Leaf": leaves,
-    "Leaves": leaves,
-    "Leaves:": leaves,
-    "Sessile": leaves,
-    "Foliage": leaves,
-    "Cauline": leaves,
-    "Fronds": leaves,
-    "Topknots": leaves,
+    "Blades": (leaf_size, leaf_shape),
+    "Sheaths": (leaf_size, leaf_shape),
+    "Leaf": (leaf_size, leaf_shape),
+    "Leaves": (leaf_size, leaf_shape),
+    "Leaves:": (leaf_size, leaf_shape),
+    "Foliage": (leaf_size, leaf_shape),
+    "Cauline": (leaf_size, leaf_shape),
+    "Fronds": (leaf_size, leaf_shape),
+    "Topknots": (leaf_size, leaf_shape),
     # Fruits
-    "Fruits": fruits,
-    "Fruiting": fruits,
-    "Acorns": fruits,
-    "Achene": fruits,
-    "Achenes": fruits,
-    "Berries": fruits,
-    "Capsules": fruits,
-    "Capules": fruits,
-    "Caryopses": fruits,
-    "Cypselae": fruits,
-    "Drupes": fruits,
-    "Loments": fruits,
-    "Legumes": fruits,
-    "Mericarps": fruits,
-    "Pappi": fruits,
-    "Pomes": fruits,
-    "Schizocarps": fruits,
+    "Fruits": (fruit_size, fruit_type),
+    "Fruiting": (fruit_size, fruit_type),
+    "Acorns": (fruit_size, fruit_type),
+    "Achene": (fruit_size, fruit_type),
+    "Achenes": (fruit_size, fruit_type),
+    "Berries": (fruit_size, fruit_type),
+    "Capsules": (fruit_size, fruit_type),
+    "Capules": (fruit_size, fruit_type),
+    "Caryopses": (fruit_size, fruit_type),
+    "Cypselae": (fruit_size, fruit_type),
+    "Drupes": (fruit_size, fruit_type),
+    "Loments": (fruit_size, fruit_type),
+    "Legumes": (fruit_size, fruit_type),
+    "Mericarps": (fruit_size, fruit_type),
+    "Pappi": (fruit_size, fruit_type),
+    "Pomes": (fruit_size, fruit_type),
+    "Schizocarps": (fruit_size, fruit_type),
+    "Utricles": (fruit_size, fruit_type),
     # Seeds
-    "Seed": seeds,
-    "Seeds": seeds,
+    "Seed": (seed_size,),
+    "Seeds": (seed_size,),
     # Unused
     "2n": None,
     "Aerial": None,
     "Anthers": None,
     "Anthesis": None,
     "Arrays": None,
+    "Bark": None,
+    "Barneby": None,
     "Basal": None,
     "Bisexual": None,
+    "Both": None,
+    "Bracteoles": None,
     "Bracts": None,
+    "Buds": None,
+    "Bulb": None,
+    "Bulbs": None,
     "Burs": None,
     "Callus": None,
     "Calluses": None,
+    "Calyces": None,
     "Calyculi": None,
+    "Cataphylls": None,
     "Central": None,
+    "Chasmogamous": None,
+    "Chromosome": None,
     "Cialdella": None,
+    "Cleistogamous": None,
     "Corms": None,
     "Corollas": None,
+    "Coty": None,
+    "Cotyledons": None,
+    "Cyathia": None,
+    "Cyathial": None,
+    "Dietrich": None,
     "Dioecious.": None,
     "Disc": None,
     "Discs": None,
+    "Duffield": None,
     "Fertile": None,
+    "Fla": None,
+    "Floral": None,
     "Florets": None,
+    "Flow": None,
     "Flowers": None,
+    "Fol": None,
+    "Follicles": None,
+    "Friesner": None,
     "Functionally": None,
+    "Glomes": None,
     "Glumes": None,
+    "Green": None,
     "Heads": None,
+    "Hips": None,
+    "In": None,
+    "Inflo": None,
+    "Inflores": None,
     "Inflorescence": None,
     "Inflorescences": None,
     "Inflorescnecs": None,
+    "Infructescences": None,
     "Inner": None,
     "Innermost": None,
     "Internodes": None,
+    "Involucellar": None,
+    "Involucre": None,
     "Involucres": None,
+    "Irwin": None,
     "Lateral": None,
+    "Latex": None,
+    "Leaflets": None,
     "Lemmas": None,
+    "Lianas": None,
     "Ligules": None,
     "Lower": None,
+    "Marazzi": None,
+    "Mature": None,
+    "Oenothera": None,
     "Outer": None,
     "Ovaries": None,
     "Paleae": None,
     "Panicles": None,
+    "Pedi": None,
     "Pedicellate": None,
     "Pedicels": None,
     "Peduncle": None,
@@ -356,96 +432,52 @@ PARSE = {
     "Primary": None,
     "Principal": None,
     "Proximal": None,
+    "Pseudobulbs": None,
+    "Racemes": None,
     "Rames": None,
     "Ray": None,
     "Rays": None,
     "Receptacles": None,
     "Receptacular": None,
+    "Rhizomal": None,
+    "Rhizome": None,
     "Rhizomes": None,
+    "Roots": None,
     "Scales": None,
+    "Scape": None,
+    "Scapes": None,
+    "Senna": None,
+    "Sessile": None,
+    "Spathe": None,
     "Spike": None,
     "Spikelets": None,
     "Spikes": None,
+    "Stamens": None,
     "Stamimate": None,
     "Staminate": None,
     "Stem": None,
     "Stems": None,
     "Stigmas": None,
+    "Stipes": None,
     "Stolons": None,
     "Style": None,
+    "Subspecies": None,
     "Subterranean": None,
     "Taproots": None,
     "Terminal": None,
-    "Tubercles": None,
-    "Tubers": None,
-    "Upper": None,
-    "Weak": None,
-    "Winter": None,
-    "Wipff": None,
-    "Bark": None,
-    "Barneby": None,
-    "Both": None,
-    "Bracteoles": None,
-    "Buds": None,
-    "Bulb": None,
-    "Bulbs": None,
-    "Calyces": None,
-    "Cataphylls": None,
-    "Chasmogamous": None,
-    "Chromosome": None,
-    "Cleistogamous": None,
-    "Coty": None,
-    "Cotyledons": None,
-    "Cyathia": None,
-    "Cyathial": None,
-    "Dietrich": None,
-    "Duffield": None,
-    "Fla": None,
-    "Floral": None,
-    "Flow": None,
-    "Fol": None,
-    "Follicles": None,
-    "Friesner": None,
-    "Glomes": None,
-    "Green": None,
-    "Hips": None,
-    "In": None,
-    "Inflo": None,
-    "Inflores": None,
-    "Infructescences": None,
-    "Involucellar": None,
-    "Involucre": None,
-    "Irwin": None,
-    "Latex": None,
-    "Leaflets": None,
-    "Lianas": None,
-    "Marazzi": None,
-    "Mature": None,
-    "Oenothera": None,
-    "Pedi": None,
-    "Pseudobulbs": None,
-    "Racemes": None,
-    "Rhizomal": None,
-    "Rhizome": None,
-    "Roots": None,
-    "Scape": None,
-    "Scapes": None,
-    "Senna": None,
-    "Spathe": None,
-    "Stamens": None,
-    "Stipes": None,
-    "Subspecies": None,
     "The": None,
     "Three": None,
     "Thyrses": None,
+    "Tubercles": None,
+    "Tubers": None,
     "Twigs": None,
     "Umbel": None,
     "Umbels": None,
-    "Utricles": None,
+    "Upper": None,
     "Variety": None,
-    "Vines": None,
-    "Vines,": None,
     "Wagner": None,
+    "Weak": None,
+    "Wipff": None,
     "Woody": None,
     "Xylopodium:": None,
 }

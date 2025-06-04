@@ -47,12 +47,10 @@ class SeedSize(Base):
                 on_match="seed_size_match",
                 decoder={
                     "seed": {"ENT_TYPE": "seed_term"},
-                    "part": {"ENT_TYPE": "seed_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
                     "seed+ size+",
-                    "part+ size+",
                 ],
             ),
         ]
@@ -66,7 +64,7 @@ class SeedSize(Base):
             if e.label_ == "size":
                 dims = e._.trait.dims
 
-            elif e.label_ in ("seed_term", "seed_part"):
+            elif e.label_ == "seed_term":
                 text = e.text.lower()
                 part = cls.replace.get(text, text)
 

@@ -5,8 +5,8 @@ from ccf.rules.size import Size
 from tests.setup import parse
 
 
-class TestFruitSize(unittest.TestCase):
-    def test_fruit_size_01(self):
+class TestPlantHeight(unittest.TestCase):
+    def test_plant_height_01(self):
         self.assertEqual(
             parse("""Herbs, bulbous-based, (5–)10–50(–70) cm."""),
             [
@@ -27,4 +27,16 @@ class TestFruitSize(unittest.TestCase):
                     ],
                 ),
             ],
+        )
+
+    def test_plant_height_02(self):
+        self.assertEqual(
+            parse("""Herbs, perennial, cespitose; rhizomes 0.5–2 cm, often absent."""),
+            [],
+        )
+
+    def test_plant_height_03(self):
+        self.assertEqual(
+            parse("""thickened taproot, 5 mm diam.."""),
+            [],
         )

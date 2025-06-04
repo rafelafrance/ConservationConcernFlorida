@@ -15,23 +15,6 @@ class TestLeafSize(unittest.TestCase):
                 """
             ),
             [
-                LeafSize(
-                    start=7,
-                    end=33,
-                    part="petiole",
-                    dims=[
-                        Dimension(
-                            dim="length",
-                            units="mm",
-                            min=5,
-                            low=10,
-                            high=30,
-                            max=50,
-                            start=16,
-                            end=33,
-                        )
-                    ],
-                ),
                 Size(
                     start=35,
                     end=59,
@@ -68,36 +51,6 @@ class TestLeafSize(unittest.TestCase):
                 """
             ),
             [
-                LeafSize(
-                    start=15,
-                    end=33,
-                    part="petiole",
-                    dims=[
-                        Dimension(
-                            dim="length",
-                            units="cm",
-                            low=12.0,
-                            high=18.0,
-                            start=24,
-                            end=33,
-                        )
-                    ],
-                ),
-                LeafSize(
-                    start=70,
-                    end=85,
-                    part="midrib",
-                    dims=[
-                        Dimension(
-                            dim="length",
-                            units="cm",
-                            low=2.0,
-                            high=4.0,
-                            start=79,
-                            end=85,
-                        )
-                    ],
-                ),
                 Size(
                     start=104,
                     end=112,

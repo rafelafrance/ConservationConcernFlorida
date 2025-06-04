@@ -32,22 +32,5 @@ class TestSeedSize(unittest.TestCase):
     def test_seed_size_03(self):
         self.assertEqual(
             parse("""hila 2–3(–4) mm,"""),
-            [
-                SeedSize(
-                    start=0,
-                    end=15,
-                    part="hilum",
-                    dims=[
-                        Dimension(
-                            dim="length",
-                            units="mm",
-                            low=2,
-                            high=3,
-                            max=4,
-                            start=5,
-                            end=15,
-                        )
-                    ],
-                ),
-            ],
+            [],
         )

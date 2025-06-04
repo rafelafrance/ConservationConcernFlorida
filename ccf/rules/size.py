@@ -58,7 +58,7 @@ class Size(Base):
             "99.9": {"TEXT": {"REGEX": t_const.FLOAT_TOKEN_RE}},
             "99-99": {"ENT_TYPE": "range"},
             "cm": {"ENT_TYPE": {"IN": cls.lengths}},
-            "dim": {"ENT_TYPE": "dim"},
+            "dim": {"ENT_TYPE": "dimension"},
             "x": {"ENT_TYPE": "cross"},
         }
         return [
@@ -103,8 +103,17 @@ class Size(Base):
                 dims[-1].start = start
                 dims[-1].end = end
 
+            elif e.label_ == "dimension":
+                text = e.text.lower()
+                dims[-1].dim = cls.replace.get(text, text)
+
+                start, end = cls.get_indices(e, start, end)
+                dims[-1].start = start
+                dims[-1].end = end
+
             elif e.label_ in cls.lengths:
-                dims[-1].units = cls.replace.get(e.text.lower(), e.text.lower())
+                text = e.text.lower()
+                dims[-1].units = cls.replace.get(text, text)
 
                 start, end = cls.get_indices(e, start, end)
                 dims[-1].start = start

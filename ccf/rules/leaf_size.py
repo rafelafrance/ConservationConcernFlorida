@@ -47,12 +47,10 @@ class LeafSize(Base):
                 on_match="leaf_size_match",
                 decoder={
                     "leaf": {"ENT_TYPE": "leaf_term"},
-                    "part": {"ENT_TYPE": "leaf_part"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
                     "leaf+ size+",
-                    "part+ size+",
                 ],
             ),
         ]
@@ -66,7 +64,7 @@ class LeafSize(Base):
             if e.label_ == "size":
                 dims = e._.trait.dims
 
-            elif e.label_ in ("leaf_part", "leaf_term"):
+            elif e.label_ == "leaf_term":
                 text = e.text.lower()
                 part = cls.replace.get(text, text)
 
