@@ -39,6 +39,8 @@ fruit_part,wing,wing
 fruit_part,winglet,winglet
 fruit_part,winglets,winglet
 fruit_part,wings,wing
+fruit_type,acorn,acorn
+fruit_type,acorns,acorn
 fruit_type,achene,achene
 fruit_type,achenes,achene
 fruit_type,berries,berry

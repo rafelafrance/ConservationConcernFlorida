@@ -37,6 +37,18 @@ class TestPlantHeight(unittest.TestCase):
 
     def test_plant_height_03(self):
         self.assertEqual(
-            parse("""thickened taproot, 5 mm diam.."""),
+            parse("""thickened taproot, 5 mm diam."""),
+            [],
+        )
+
+    def test_plant_height_04(self):
+        self.assertEqual(
+            parse("""rhizome rhizome internodes 1.2–2.8 mm thick."""),
+            [],
+        )
+
+    def test_plant_height_05(self):
+        self.assertEqual(
+            parse("""with knotty rhizomes less than 2 mm thick."""),
             [],
         )

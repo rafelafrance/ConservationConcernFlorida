@@ -50,12 +50,12 @@ class OtherSize(Base):
                 label="other_size",
                 on_match="other_size_match",
                 decoder={
-                    ",": {"POS": "PUNCT"},
+                    "fill": {"POS": {"IN": ["PUNCT", "ADJ", "ADP"]}},
                     "other": {"ENT_TYPE": {"IN": cls.others}},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "other+ ,* size+",
+                    "other+ fill* size+",
                 ],
             ),
         ]

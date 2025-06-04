@@ -102,20 +102,35 @@ class TestSize(unittest.TestCase):
             parse("""(2.5-)2.8-3.5(-4.5) × 1x 1.6-2.2 mm"""),
             [
                 Size(
+                    start=0,
+                    end=35,
                     dims=[
                         Dimension(
                             dim="length",
+                            units="mm",
                             min=2.5,
                             low=2.8,
                             high=3.5,
                             max=4.5,
-                            units="mm",
                             start=0,
+                            end=19,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            low=1.0,
+                            start=22,
+                            end=23,
+                        ),
+                        Dimension(
+                            dim="thickness",
+                            units="mm",
+                            low=1.6,
+                            high=2.2,
+                            start=25,
                             end=35,
-                        )
+                        ),
                     ],
-                    start=0,
-                    end=35,
-                ),
+                )
             ],
         )

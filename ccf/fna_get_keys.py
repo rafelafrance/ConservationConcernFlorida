@@ -8,7 +8,8 @@ from pathlib import Path
 
 import ftfy
 from bs4 import BeautifulSoup
-from fna_rule_parser import PARSE
+
+from ccf.pylib.fna_parse_treatment import PARSE
 
 
 def main(args):
