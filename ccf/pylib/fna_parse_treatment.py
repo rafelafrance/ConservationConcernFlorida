@@ -2,11 +2,11 @@ import csv
 import re
 from pathlib import Path
 
-import ftfy
 from bs4 import BeautifulSoup
 
 from ccf.pylib import pipeline
 from ccf.pylib.dimension import Dimension
+from ccf.pylib.str_util import clean
 from ccf.rules.size import Size
 
 PIPELINE = pipeline.build()
@@ -24,12 +24,6 @@ def parse_treatment(record, treatment):
             for func in funcs:
                 if func not in used and func(key, text, record):
                     used.add(func)  # Only parse a trait once
-
-
-def parse_info(record, info):
-    phenology(info, record)
-    habitat(info, record)
-    elevation(info, record)
 
 
 def init_record(page):
@@ -53,25 +47,6 @@ def find_treatment(soup):
     parts = [p.text.strip() for p in soup2.find_all(string=True)]
     treatment = dict(zip(parts[0::2], parts[1::2], strict=True))
     return treatment
-
-
-def get_info(soup):
-    info = soup.find("div", class_="treatment-info")
-    if not info:
-        return None
-    info = info.find_all(string=True)
-    info = [clean(x) for i in info if (x := i.strip()) and i.find(":") > -1]
-    info = {i.split(":")[0].strip(): i.split(":")[1].strip() for i in info}
-    return info
-
-
-def clean(text):
-    text = ftfy.fix_text(text)  # Handle common mojibake
-    text = re.sub(r"[–—\-]+", "-", text)
-    text = text.replace("±", "+/-")
-    text = text.replace("×", "x")
-    text = text.replace("\xa0", " ")
-    return text
 
 
 def has_value(dim):
@@ -134,6 +109,7 @@ def seed_size(_key, text, record):
 
     length = get_size_dim(size, "length")
     width = get_size_dim(size, "width")
+    diameter = get_size_dim(size, "diameter")
 
     record["seed_length_min_cm"] = length.min
     record["seed_length_low_cm"] = length.low
@@ -144,6 +120,11 @@ def seed_size(_key, text, record):
     record["seed_width_low_cm"] = width.low
     record["seed_width_high_cm"] = width.high
     record["seed_width_max_cm"] = width.max
+
+    record["seed_diameter_min_cm"] = diameter.min
+    record["seed_diameter_low_cm"] = diameter.low
+    record["seed_diameter_high_cm"] = diameter.high
+    record["seed_diameter_max_cm"] = diameter.max
 
     return has_value(length) or has_value(width)
 
@@ -159,6 +140,7 @@ def fruit_size(_key, text, record):
 
     length = get_size_dim(size, ["length", "height"])
     width = get_size_dim(size, "width")
+    diameter = get_size_dim(size, "diameter")
 
     record["fruit_length_min_cm"] = length.min
     record["fruit_length_low_cm"] = length.low
@@ -170,24 +152,12 @@ def fruit_size(_key, text, record):
     record["fruit_width_high_cm"] = width.high
     record["fruit_width_max_cm"] = width.max
 
+    record["fruit_diameter_min_cm"] = diameter.min
+    record["fruit_diameter_low_cm"] = diameter.low
+    record["fruit_diameter_high_cm"] = diameter.high
+    record["fruit_diameter_max_cm"] = diameter.max
+
     return has_value(length) or has_value(width)
-
-
-def phenology(info, record):
-    record["flowering_time"] = info.get("Phenology", "")
-
-
-def habitat(info, record):
-    record["habitat"] = info.get("Habitat", "")
-
-
-def elevation(info, record):
-    text = info.get("Elevation", "")
-    size = get_size_trait(text, "", "")
-    elev = get_size_dim(size, "length")
-
-    record["elevation_min_m"] = elev.low
-    record["elevation_max_m"] = elev.high
 
 
 def get_size_trait(text: str, label: str, part: str) -> Size:
@@ -213,6 +183,39 @@ def vocab_hits(text, vocab, key=None):
     hits = {key: 1} if key and key.lower() in vocab else {}
     hits |= {w: 1 for w in re.split(r"\W+", text) if w.lower() in vocab}
     return " | ".join(hits.keys())
+
+
+def get_info(soup):
+    info = soup.find("div", class_="treatment-info")
+    if not info:
+        return None
+    info = info.find_all(string=True)
+    info = [clean(x) for i in info if (x := i.strip()) and i.find(":") > -1]
+    info = {i.split(":")[0].strip(): i.split(":")[1].strip() for i in info}
+    return info
+
+
+def parse_info(info, record):
+    phenology(info, record)
+    habitat(info, record)
+    elevation(info, record)
+
+
+def phenology(info, record):
+    record["flowering_time"] = info.get("Phenology", "")
+
+
+def habitat(info, record):
+    record["habitat"] = info.get("Habitat", "")
+
+
+def elevation(info, record):
+    text = info.get("Elevation", "")
+    size = get_size_trait(text, "", "")
+    elev = get_size_dim(size, "length")
+
+    record["elevation_min_m"] = elev.low
+    record["elevation_max_m"] = elev.high
 
 
 def get_terms():

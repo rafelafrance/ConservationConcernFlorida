@@ -2,11 +2,19 @@ import unittest
 
 from ccf.pylib.dimension import Dimension
 from ccf.rules.leaf_size import LeafSize
+from ccf.rules.shape import Shape
 from ccf.rules.size import Size
 from tests.setup import parse
 
 
 class TestLeafSize(unittest.TestCase):
+    def test_leaf_size_00(self):
+        parse(
+            """
+            Leaves inversely W-shaped, 20–70 cm × 4–7 mm,
+            """
+        )
+
     def test_leaf_size_01(self):
         self.assertEqual(
             parse(
@@ -72,9 +80,10 @@ class TestLeafSize(unittest.TestCase):
         self.assertEqual(
             parse("""Leaf blades, 13–37 × 7–32 mm,"""),
             [
-                Size(
-                    start=13,
+                LeafSize(
+                    start=0,
                     end=28,
+                    part="leaf",
                     dims=[
                         Dimension(
                             dim="length",
@@ -138,8 +147,25 @@ class TestLeafSize(unittest.TestCase):
             ),
             [
                 Size(
-                    start=119,
+                    start=27,
+                    end=41,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="mm",
+                            low=1.0,
+                            high=1.2,
+                            max=2.8,
+                            start=27,
+                            end=41,
+                        )
+                    ],
+                ),
+                LeafSize(
+                    start=112,
                     end=138,
+                    _trait="leaf_size",
+                    part="leaf",
                     dims=[
                         Dimension(
                             dim="length",
@@ -158,7 +184,7 @@ class TestLeafSize(unittest.TestCase):
                             end=138,
                         ),
                     ],
-                )
+                ),
             ],
         )
 
@@ -173,7 +199,33 @@ class TestLeafSize(unittest.TestCase):
                 15–45(–90+) × (0.5–)2–8(–12+) mm.
                 """
             ),
-            [],
+            [
+                Size(
+                    start=229,
+                    end=262,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="mm",
+                            low=15.0,
+                            high=45.0,
+                            max=90.0,
+                            start=229,
+                            end=240,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            min=0.5,
+                            low=2.0,
+                            high=8.0,
+                            max=12.0,
+                            start=243,
+                            end=262,
+                        ),
+                    ],
+                )
+            ],
         )
 
     def test_leaf_size_07(self):
@@ -228,6 +280,133 @@ class TestLeafSize(unittest.TestCase):
                             high=2.5,
                             start=64,
                             end=79,
+                        ),
+                    ],
+                )
+            ],
+        )
+
+    def test_leaf_size_10(self):
+        self.assertEqual(
+            parse("""air spaces shorter than 0.3 mm;"""),
+            [],
+        )
+
+    def test_leaf_size_11(self):
+        self.assertEqual(
+            parse("""hairs to 4 mm;"""),
+            [],
+        )
+
+    def test_leaf_size_12(self):
+        self.assertEqual(
+            parse("""stipules 2–5 stipitate glands, to 0.5 mm;"""),
+            [],
+        )
+
+    def test_leaf_size_13(self):
+        self.assertEqual(
+            parse("""stipules persistent, subulate, 1–2 × 0.5–1 mm,"""),
+            [Shape(start=21, end=29, shape="subulate")],
+        )
+
+    def test_leaf_size_14(self):
+        self.assertEqual(
+            parse("""peti­ole 1–4 cm;"""),
+            [],
+        )
+
+    def test_leaf_size_15(self):
+        self.assertEqual(
+            parse("""long-petiolate (to 15 cm;"""),
+            [],
+        )
+
+    def test_leaf_size_16(self):
+        self.assertEqual(
+            parse("""blades 2-45 cm long, 0.3-1.5(2) mm wide,"""),
+            [
+                LeafSize(
+                    start=0,
+                    end=39,
+                    part="leaf",
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="cm",
+                            low=2.0,
+                            high=45.0,
+                            start=7,
+                            end=19,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            low=0.3,
+                            high=1.5,
+                            max=2.0,
+                            start=21,
+                            end=39,
+                        ),
+                    ],
+                )
+            ],
+        )
+
+    def test_leaf_size_17(self):
+        self.assertEqual(
+            parse("""blades 10-25 cm long, 15-30 mm wide,"""),
+            [
+                LeafSize(
+                    start=0,
+                    end=35,
+                    part="leaf",
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="cm",
+                            low=10.0,
+                            high=25.0,
+                            start=7,
+                            end=20,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            low=15.0,
+                            high=30.0,
+                            start=22,
+                            end=35,
+                        ),
+                    ],
+                )
+            ],
+        )
+
+    def test_leaf_size_18(self):
+        self.assertEqual(
+            parse("""1.5–3.5(–4.5) cm ×5–12 mm,"""),
+            [
+                Size(
+                    start=0,
+                    end=25,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="cm",
+                            low=1.5,
+                            high=3.5,
+                            max=4.5,
+                            start=0,
+                            end=16,
+                        ),
+                        Dimension(
+                            dim="width",
+                            units="mm",
+                            low=5.0,
+                            high=12.0,
+                            start=18,
+                            end=25,
                         ),
                     ],
                 )

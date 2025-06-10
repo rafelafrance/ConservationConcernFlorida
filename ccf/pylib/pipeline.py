@@ -19,7 +19,6 @@ def build():
 
     tokenizer.setup_tokenizer(nlp)
 
-    Shape.pipe(nlp)
     LeafDuration.pipe(nlp)
     FruitType.pipe(nlp)
 
@@ -32,5 +31,7 @@ def build():
     FruitSize.pipe(nlp)
 
     delete.pipe(nlp, traits=["other_size"])
+
+    Shape.pipe(nlp)
 
     return nlp

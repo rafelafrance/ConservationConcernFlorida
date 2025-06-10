@@ -19,6 +19,7 @@ class OtherSize(Base):
         Path(__file__).parent / "terms" / "fruit_terms.csv",
         Path(__file__).parent / "terms" / "leaf_terms.csv",
         Path(__file__).parent / "terms" / "seed_terms.csv",
+        Path(__file__).parent / "terms" / "shape_terms.csv",
     ]
     others: ClassVar[list[str]] = ["other_term", "fruit_part", "leaf_part", "seed_part"]
     # ---------------------
@@ -50,12 +51,16 @@ class OtherSize(Base):
                 label="other_size",
                 on_match="other_size_match",
                 decoder={
-                    "fill": {"POS": {"IN": ["PUNCT", "ADJ", "ADP"]}},
+                    "9.9": {"TEXT": {"REGEX": r"\d+(\.\d*)?"}},
+                    "fill": {"POS": {"IN": ["PUNCT", "ADP", "CCONJ"]}},
                     "other": {"ENT_TYPE": {"IN": cls.others}},
+                    "shape": {"ENT_TYPE": "shape_term"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
                     "other+ fill* size+",
+                    "other+ fill* shape+ fill* size+",
+                    "other+ 9.9 fill+ size+",
                 ],
             ),
         ]

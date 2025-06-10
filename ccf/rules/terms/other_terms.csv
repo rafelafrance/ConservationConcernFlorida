@@ -1,29 +1,47 @@
 label,pattern
+other_term,(terete)
 other_term,apices
 other_term,auricle
 other_term,auricles
-other_term,filiform
+other_term,cylindric
+other_term,divaricate or ascending
+other_term,fascicle
+other_term,fascicles
+other_term,gland
+other_term,glands
+other_term,hairs
+other_term,hairs erect
+other_term,hairs to
 other_term,internode
 other_term,internodes
+other_term,jointed
+other_term,less than
 other_term,ligule
 other_term,ligules
+other_term,longer than
+other_term,more than
 other_term,node
 other_term,nodes
-other_term,or
 other_term,ochrea
 other_term,ocrea
 other_term,pair
 other_term,pairs
+other_term,pedicel
+other_term,pedicels
 other_term,pedicle
 other_term,pedicles
 other_term,peduncle
+other_term,petiolate
 other_term,petiole
 other_term,petioles
 other_term,rhizome
 other_term,rhizomes
+other_term,shorter than
 other_term,stipe
 other_term,stipes
 other_term,stipule
 other_term,stipules
+other_term,subulate
 other_term,taproot
 other_term,taproots
+other_term,unbranched

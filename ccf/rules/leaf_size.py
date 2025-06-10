@@ -46,11 +46,13 @@ class LeafSize(Base):
                 label="leaf_size",
                 on_match="leaf_size_match",
                 decoder={
+                    ",": {"POS": {"IN": ["PUNCT"]}},
                     "leaf": {"ENT_TYPE": "leaf_term"},
                     "size": {"ENT_TYPE": "size"},
                 },
                 patterns=[
-                    "leaf+ size+",
+                    "leaf+ ,* size+",
+                    "leaf+ size+ ,* size+",
                 ],
             ),
         ]
@@ -62,7 +64,7 @@ class LeafSize(Base):
 
         for e in ent.ents:
             if e.label_ == "size":
-                dims = e._.trait.dims
+                dims += e._.trait.dims
 
             elif e.label_ == "leaf_term":
                 text = e.text.lower()

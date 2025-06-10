@@ -121,6 +121,10 @@ class TestFnaRuleParser(unittest.TestCase):
                 "fruit_width_low_cm": None,
                 "fruit_width_high_cm": None,
                 "fruit_width_max_cm": None,
+                "fruit_diameter_min_cm": None,
+                "fruit_diameter_low_cm": None,
+                "fruit_diameter_high_cm": None,
+                "fruit_diameter_max_cm": None,
             },
         )
 
@@ -142,5 +146,34 @@ class TestFnaRuleParser(unittest.TestCase):
                 "fruit_width_low_cm": 1.0,
                 "fruit_width_high_cm": 1.8,
                 "fruit_width_max_cm": None,
+                "fruit_diameter_min_cm": None,
+                "fruit_diameter_low_cm": None,
+                "fruit_diameter_high_cm": None,
+                "fruit_diameter_max_cm": None,
+            },
+        )
+
+    def test_fna_rule_parser_08(self):
+        treatment = {
+            "Drupes": "juicy, sweet, glossy black, 6–9 mm diam.,",
+        }
+        record = {}
+        fna.parse_treatment(record, treatment)
+        self.assertEqual(
+            record,
+            {
+                "fruit_type": "drupes",
+                "fruit_length_min_cm": None,
+                "fruit_length_low_cm": None,
+                "fruit_length_high_cm": None,
+                "fruit_length_max_cm": None,
+                "fruit_width_min_cm": None,
+                "fruit_width_low_cm": None,
+                "fruit_width_high_cm": None,
+                "fruit_width_max_cm": None,
+                "fruit_diameter_min_cm": None,
+                "fruit_diameter_low_cm": 0.6,
+                "fruit_diameter_high_cm": 0.9,
+                "fruit_diameter_max_cm": None,
             },
         )

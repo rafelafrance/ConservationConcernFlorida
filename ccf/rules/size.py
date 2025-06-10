@@ -157,14 +157,6 @@ class Size(Base):
         return trait
 
     @classmethod
-    def size_match(cls, ent):
-        dims = cls.scan_parts(ent)
-        cls.fill_units(dims)
-        cls.fill_dimensions(dims)
-        trait = cls.fill_trait_data(dims, ent)
-        return trait
-
-    @classmethod
     def convert_units_to_cm(cls, size_trait):
         for dim in size_trait.dims:
             for key in ("min", "low", "high", "max"):
@@ -177,6 +169,14 @@ class Size(Base):
                 value = round(value * factor, 3)
                 setattr(dim, key, value)
         return size_trait
+
+    @classmethod
+    def size_match(cls, ent):
+        dims = cls.scan_parts(ent)
+        cls.fill_units(dims)
+        cls.fill_dimensions(dims)
+        trait = cls.fill_trait_data(dims, ent)
+        return trait
 
 
 @registry.misc("size_match")

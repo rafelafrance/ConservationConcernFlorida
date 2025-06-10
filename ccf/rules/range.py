@@ -44,7 +44,7 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " ( 9.9 - ) 9.9 ",
+                    " ( 9.9 -* ) 9.9 ",
                 ],
             ),
             Compiler(
@@ -60,7 +60,7 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " 9.9 ( - 9.9 [+]? ) ",
+                    " 9.9 ( -* 9.9 [+]? ) ",
                 ],
             ),
             Compiler(
@@ -68,7 +68,7 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " ( 9.9 - ) 9.9 - 9.9 [+]? ",
+                    " ( 9.9 -* ) 9.9 - 9.9 [+]? ",
                 ],
             ),
             Compiler(
@@ -76,7 +76,7 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " ( 9.9 - ) 9.9 - ( - 9.9 [+]? ) ",
+                    " ( 9.9 -* ) 9.9 - ( -* 9.9 [+]? ) ",
                 ],
             ),
             Compiler(
@@ -84,7 +84,7 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " 9.9 - 9.9 ( - 9.9 [+]? ) ",
+                    " 9.9 - 9.9 ( -* 9.9 [+]? ) ",
                 ],
             ),
             Compiler(
@@ -92,8 +92,8 @@ class Range(Base):
                 on_match="range_match",
                 decoder=decoder,
                 patterns=[
-                    " ( 9.9 - ) 9.9 - 9.9 [+]? ( - 9.9 [+]? ) ",
-                    " ( 9.9 - ) 9.9 - 9.9 [+]? ( - 9.9 [+]? ) ( - 9.9 [+]? ) ",
+                    " ( 9.9 -* ) 9.9 - 9.9 [+]? ( -* 9.9 [+]? ) ",
+                    " ( 9.9 -* ) 9.9 - 9.9 [+]? ( -* 9.9 [+]? ) ( -* 9.9 [+]? ) ",
                 ],
             ),
         ]
