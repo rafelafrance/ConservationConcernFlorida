@@ -175,3 +175,23 @@ class TestPlantHeight(unittest.TestCase):
                 )
             ],
         )
+
+    def test_plant_height_13(self):
+        self.assertEqual(
+            parse("""Perennials, to 125+ cm;"""),
+            [
+                Size(
+                    start=12,
+                    end=22,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="cm",
+                            high=125.0,
+                            start=15,
+                            end=22,
+                        )
+                    ],
+                )
+            ],
+        )

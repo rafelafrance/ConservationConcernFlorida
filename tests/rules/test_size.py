@@ -98,6 +98,7 @@ class TestSize(unittest.TestCase):
         )
 
     def test_size_05(self):
+        self.maxDiff = None
         self.assertEqual(
             parse("""(2.5-)2.8-3.5(-4.5) × 1x 1.6-2.2 mm"""),
             [

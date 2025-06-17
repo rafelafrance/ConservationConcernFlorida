@@ -2,6 +2,7 @@ import unittest
 
 from ccf.pylib.dimension import Dimension
 from ccf.rules.fruit_size import FruitSize
+from ccf.rules.fruit_type import FruitType
 from ccf.rules.shape import Shape
 from ccf.rules.size import Size
 from tests.setup import parse
@@ -11,7 +12,7 @@ class TestFruitSize(unittest.TestCase):
     def test_fruit_size_00(self):
         parse(
             """
-            black, 6–8 mm diam.
+            Cypselae light golden brown with darker brown veins, 6–9 mm; pappi 4–6 mm.
             """
         )
 
@@ -87,6 +88,31 @@ class TestFruitSize(unittest.TestCase):
                             high=9.0,
                             start=0,
                             end=12,
+                        )
+                    ],
+                ),
+            ],
+        )
+
+    def test_fruit_size_06(self):
+        self.assertEqual(
+            parse(
+                """Cypselae with darker brown veins, 6–9 mm;
+                pappi 4–6 mm."""
+            ),
+            [
+                FruitType(start=0, end=8, fruit_type="cypsela"),
+                Size(
+                    start=34,
+                    end=40,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="mm",
+                            low=6.0,
+                            high=9.0,
+                            start=34,
+                            end=40,
                         )
                     ],
                 ),

@@ -101,6 +101,9 @@ leaf_part,pulvini,pulvini
 leaf_part,pulvinule,pulvinule
 leaf_part,pulvinules,pulvinule
 leaf_part,pulvinus,pulvinus
+leaf_part,reticulate,rachis
+leaf_part,reticulate,rachises
+leaf_part,reticulate,rachides
 leaf_part,reticulate,reticulate
 leaf_part,rib,rib
 leaf_part,ribbed,rib

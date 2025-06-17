@@ -35,7 +35,7 @@ class OtherSize(Base):
             nlp,
             name="other_size_patterns",
             compiler=cls.other_size_patterns(),
-            overwrite=["size"],
+            overwrite=["size", *cls.others],
         )
 
         add.cleanup_pipe(nlp, name="other_size_cleanup")
@@ -46,13 +46,14 @@ class OtherSize(Base):
 
     @classmethod
     def other_size_patterns(cls):
+        fill = ["PUNCT", "ADP", "CCONJ", "ADV", "PART", "ADJ"]
         return [
             Compiler(
                 label="other_size",
                 on_match="other_size_match",
                 decoder={
                     "9.9": {"TEXT": {"REGEX": r"\d+(\.\d*)?"}},
-                    "fill": {"POS": {"IN": ["PUNCT", "ADP", "CCONJ"]}},
+                    "fill": {"POS": {"IN": fill}},
                     "other": {"ENT_TYPE": {"IN": cls.others}},
                     "shape": {"ENT_TYPE": "shape_term"},
                     "size": {"ENT_TYPE": "size"},
@@ -60,7 +61,9 @@ class OtherSize(Base):
                 patterns=[
                     "other+ fill* size+",
                     "other+ fill* shape+ fill* size+",
+                    "other+ fill* shape+ fill* shape+ fill* size+",
                     "other+ 9.9 fill+ size+",
+                    "size+ other+",
                 ],
             ),
         ]

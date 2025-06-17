@@ -11,7 +11,7 @@ class TestLeafSize(unittest.TestCase):
     def test_leaf_size_00(self):
         parse(
             """
-            Leaves inversely W-shaped, 20–70 cm × 4–7 mm,
+            leaves 3-foliolate, (7–)10–20(–30) cm,
             """
         )
 
@@ -146,6 +146,7 @@ class TestLeafSize(unittest.TestCase):
                 """
             ),
             [
+                Shape(start=17, end=25, shape="filiform"),
                 Size(
                     start=27,
                     end=41,
@@ -200,6 +201,7 @@ class TestLeafSize(unittest.TestCase):
                 """
             ),
             [
+                Shape(start=219, end=227, shape="filiform"),
                 Size(
                     start=229,
                     end=262,
@@ -224,7 +226,7 @@ class TestLeafSize(unittest.TestCase):
                             end=262,
                         ),
                     ],
-                )
+                ),
             ],
         )
 
@@ -411,4 +413,33 @@ class TestLeafSize(unittest.TestCase):
                     ],
                 )
             ],
+        )
+
+    def test_leaf_size_19(self):
+        self.assertEqual(
+            parse("""1–2 mm margin"""),
+            [],
+        )
+
+    def test_leaf_size_20(self):
+        self.assertEqual(
+            parse("""stipules linear-lanceolate, 2–6 mm,"""),
+            [
+                Shape(start=9, end=15, shape="linear"),
+                Shape(start=16, end=26, shape="lanceolate"),
+            ],
+        )
+
+    def test_leaf_size_21(self):
+        self.assertEqual(
+            parse("""connate at base, filiform, 1–1.2(–2.8) mm,"""),
+            [
+                Shape(start=17, end=25, shape="filiform"),
+            ],
+        )
+
+    def test_leaf_size_22(self):
+        self.assertEqual(
+            parse("""ciliate, 0.2–0.3 mm,"""),
+            [],
         )

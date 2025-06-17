@@ -15,6 +15,7 @@ from ccf.pylib.dimension import Dimension
 
 ALL_CSVS = [
     Path(__file__).parent / "terms" / "dimension_terms.csv",
+    Path(t_terms.__file__).parent / "about_terms.csv",
     Path(t_terms.__file__).parent / "unit_length_terms.csv",
 ]
 
@@ -55,10 +56,14 @@ class Size(Base):
         decoder = {
             "(": {"TEXT": {"IN": t_const.OPEN}},
             ")": {"TEXT": {"IN": t_const.CLOSE}},
-            "99.9": {"TEXT": {"REGEX": t_const.FLOAT_TOKEN_RE}},
             "99-99": {"ENT_TYPE": "range"},
+            "99.9": {"TEXT": {"REGEX": t_const.FLOAT_TOKEN_RE}},
+            "[+]": {"TEXT": {"IN": t_const.PLUS}},
+            "about": {"ENT_TYPE": "about_term"},
             "cm": {"ENT_TYPE": {"IN": cls.lengths}},
             "dim": {"ENT_TYPE": "dimension"},
+            "in": {"LOWER": "in"},
+            "to": {"LOWER": "to"},
             "x": {"ENT_TYPE": "cross"},
         }
         return [
@@ -70,6 +75,14 @@ class Size(Base):
                     "99-99+ cm+ dim*",
                     "99-99+ cm* dim* x 99-99+ cm+ dim*",
                     "99-99+ cm* dim* x 99-99+ cm* dim* x 99-99+ cm+ dim*",
+                ],
+            ),
+            Compiler(
+                label="size_high",
+                on_match="size_high_only_match",
+                decoder=decoder,
+                patterns=[
+                    "to about* 99.9+ [+]? about* cm+ in? dim*",
                 ],
             ),
         ]
@@ -178,7 +191,23 @@ class Size(Base):
         trait = cls.fill_trait_data(dims, ent)
         return trait
 
+    @classmethod
+    def size_high_only_match(cls, ent):
+        dims = cls.scan_parts(ent)
+        cls.fill_units(dims)
+        cls.fill_dimensions(dims)
+        ent._.relabel = "size"
+        trait = cls.fill_trait_data(dims, ent)
+        trait.dims[0].high = trait.dims[0].low
+        trait.dims[0].low = None
+        return trait
+
 
 @registry.misc("size_match")
 def size_match(ent):
     return Size.size_match(ent)
+
+
+@registry.misc("size_high_only_match")
+def size_high_only_match(ent):
+    return Size.size_high_only_match(ent)

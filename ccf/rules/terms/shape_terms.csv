@@ -103,7 +103,8 @@ shape_term,even-pinnate
 shape_term,falcate
 shape_term,fasciculate
 shape_term,fenestrate
-shape_term,flabelliorm
+shape_term,fenestrate
+shape_term,filiform
 shape_term,flagelliform
 shape_term,foliate
 shape_term,funicular
@@ -134,6 +135,7 @@ shape_term,irregular
 shape_term,keeled
 shape_term,labiate
 shape_term,labriform
+shape_term,lacerate
 shape_term,laciniate
 shape_term,laminar
 shape_term,lance-attenuate

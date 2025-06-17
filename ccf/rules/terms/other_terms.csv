@@ -1,17 +1,25 @@
 label,pattern
 other_term,(terete)
 other_term,apices
+other_term,ascending
 other_term,auricle
 other_term,auricles
+other_term,bristles
+other_term,cilia
+other_term,ciliate
+other_term,cilium
+other_term,connate
+other_term,connate at base
 other_term,cylindric
+other_term,divaricate
 other_term,divaricate or ascending
 other_term,fascicle
 other_term,fascicles
 other_term,gland
 other_term,glands
+other_term,hair
 other_term,hairs
 other_term,hairs erect
-other_term,hairs to
 other_term,internode
 other_term,internodes
 other_term,jointed
@@ -19,6 +27,8 @@ other_term,less than
 other_term,ligule
 other_term,ligules
 other_term,longer than
+other_term,margin
+other_term,margins
 other_term,more than
 other_term,node
 other_term,nodes
@@ -34,6 +44,7 @@ other_term,peduncle
 other_term,petiolate
 other_term,petiole
 other_term,petioles
+other_term,reflexed
 other_term,rhizome
 other_term,rhizomes
 other_term,shorter than
@@ -41,7 +52,6 @@ other_term,stipe
 other_term,stipes
 other_term,stipule
 other_term,stipules
-other_term,subulate
 other_term,taproot
 other_term,taproots
 other_term,unbranched
