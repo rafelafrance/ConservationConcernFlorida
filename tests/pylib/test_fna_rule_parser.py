@@ -177,3 +177,79 @@ class TestFnaRuleParser(unittest.TestCase):
                 "fruit_diameter_max_cm": None,
             },
         )
+
+    def test_fna_rule_parser_09(self):
+        treatment = {
+            "Leaves": "1–3 cm;",
+        }
+        record = {}
+        fna.parse_treatment(record, treatment)
+        self.assertEqual(
+            record,
+            {
+                "leaf_length_min_cm": None,
+                "leaf_length_low_cm": 1.0,
+                "leaf_length_high_cm": 3.0,
+                "leaf_length_max_cm": None,
+                "leaf_width_min_cm": None,
+                "leaf_width_low_cm": None,
+                "leaf_width_high_cm": None,
+                "leaf_width_max_cm": None,
+                "leaf_thickness_min_cm": None,
+                "leaf_thickness_low_cm": None,
+                "leaf_thickness_high_cm": None,
+                "leaf_thickness_max_cm": None,
+                "leaf_shape": "",
+            },
+        )
+
+    def test_fna_rule_parser_10(self):
+        treatment = {
+            "Leaves": "blade linear-subulate, (1–)2.5–4 × 0.2–0.3 mm,",
+        }
+        record = {}
+        fna.parse_treatment(record, treatment)
+        self.assertEqual(
+            record,
+            {
+                "leaf_length_min_cm": 0.1,
+                "leaf_length_low_cm": 0.25,
+                "leaf_length_high_cm": 0.4,
+                "leaf_length_max_cm": None,
+                "leaf_width_min_cm": None,
+                "leaf_width_low_cm": 0.02,
+                "leaf_width_high_cm": 0.03,
+                "leaf_width_max_cm": None,
+                "leaf_thickness_min_cm": None,
+                "leaf_thickness_low_cm": None,
+                "leaf_thickness_high_cm": None,
+                "leaf_thickness_max_cm": None,
+                "leaf_shape": "linear | subulate",
+            },
+        )
+
+    def test_fna_rule_parser_11(self):
+        self.maxDiff = None
+        treatment = {
+            "Cypselae": "light golden brown with darker brown veins, 6–9 mm;",
+        }
+        record = {}
+        fna.parse_treatment(record, treatment)
+        self.assertEqual(
+            record,
+            {
+                "fruit_type": "cypselae",
+                "fruit_length_min_cm": None,
+                "fruit_length_low_cm": 0.6,
+                "fruit_length_high_cm": 0.9,
+                "fruit_length_max_cm": None,
+                "fruit_width_min_cm": None,
+                "fruit_width_low_cm": None,
+                "fruit_width_high_cm": None,
+                "fruit_width_max_cm": None,
+                "fruit_diameter_min_cm": None,
+                "fruit_diameter_low_cm": None,
+                "fruit_diameter_high_cm": None,
+                "fruit_diameter_max_cm": None,
+            },
+        )

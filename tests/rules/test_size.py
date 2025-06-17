@@ -135,3 +135,25 @@ class TestSize(unittest.TestCase):
                 )
             ],
         )
+
+    def test_size_06(self):
+        self.assertEqual(
+            parse("""5–10(–30) dm,"""),
+            [
+                Size(
+                    start=0,
+                    end=12,
+                    dims=[
+                        Dimension(
+                            dim="length",
+                            units="dm",
+                            low=5.0,
+                            high=10.0,
+                            max=30.0,
+                            start=0,
+                            end=12,
+                        )
+                    ],
+                )
+            ],
+        )
