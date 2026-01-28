@@ -8,6 +8,7 @@ from pathlib import Path
 
 import ftfy
 from bs4 import BeautifulSoup
+from pylib import fna_parse_treatment as parser
 from pylib import log, pipeline
 from pylib.trait_extractor import TraitExtractor
 from rules.size import Size
@@ -44,7 +45,7 @@ def main(args):
         used = set()
 
         for key, value in treatment.items():
-            if (func := PARSE.get(key)) and func not in used:
+            if (func := parser.PARSE.get(key)) and func not in used:
                 used.add(func)  # Only use a parse function once
                 func(key, value, rec)
 
@@ -199,110 +200,32 @@ def elevation(info, rec: TraitExtractor):
     rec.elevation = get_size_dim(size, text, "length")
 
 
-PARSE = {
-    # Plants
-    "Annual": plants,
-    "Annual,": plants,
-    "Annuals": plants,
-    "Annuals,": plants,
-    "Biennial": plants,
-    "Biennials": plants,
-    "Biennials,": plants,
-    "Perennial": plants,
-    "Perennials": plants,
-    "Perennials,": plants,
-    "Perennials.": plants,
-    "Plants": plants,
-    "Shrubs": plants,
-    "Shrubs,": plants,
-    "Subshrubs": plants,
-    "Subshrubs,": plants,
-    # Leaves
-    "Leaf": leaves,
-    "Leaves": leaves,
-    "Leaves:": leaves,
-    "Cauline": leaves,
-    # Fruits
-    "Fruits": fruits,
-    "Cypselae": fruits,
-    # Seeds
-    "Seeds": seeds,
-    # Unused
-    "2n": None,
-    "Aerial": None,
-    "Arrays": None,
-    "Basal": None,
-    "Bisexual": None,
-    "Bracts": None,
-    "Burs": None,
-    "Calyculi": None,
-    "Corms": None,
-    "Corollas": None,
-    "Dioecious.": None,
-    "Disc": None,
-    "Discs": None,
-    "Florets": None,
-    "Functionally": None,
-    "Heads": None,
-    "Herbage": None,
-    "Inner": None,
-    "Innermost": None,
-    "Internodes": None,
-    "Involucres": None,
-    "Outer": None,
-    "Ovaries": None,
-    "Paleae": None,
-    "Pappi": None,
-    "Peduncle": None,
-    "Peduncles": None,
-    "Petioles": None,
-    "Phyllaries": None,
-    "Phyllary": None,
-    "Pistillate": None,
-    "Principal": None,
-    "Ray": None,
-    "Rays": None,
-    "Receptacles": None,
-    "Receptacular": None,
-    "Staminate": None,
-    "Stem": None,
-    "Stems": None,
-    "Stolons": None,
-    "Style": None,
-    "Taproots": None,
-    "Weak": None,
-    "Winter": None,
-}
-
-
 def parse_args():
     arg_parser = argparse.ArgumentParser(
         allow_abbrev=True,
         description=textwrap.dedent(
-            "Make LM training data from downloaded HTML files."
+            """
+            Create DSPy training data from rule parses.
+
+            Given the output from fna_rule_parser.py convert it into a format that
+            DSPy can use for "training" models.
+            """
         ),
     )
 
     arg_parser.add_argument(
         "--family",
-        required=True,
-        metavar="FAMILY",
-        help="""The taxa are a part of this family.""",
-    )
-
-    arg_parser.add_argument(
-        "--html-dir",
         type=Path,
         required=True,
         metavar="PATH",
-        help="""Parse HTML files in this directory.""",
+        help="""Get fna_rule_parser.py results from this CSV file.""",
     )
 
     arg_parser.add_argument(
         "--out-json",
         type=Path,
         metavar="PATH",
-        help="""Output the results to this JSON file.""",
+        help="""Output the training data to this JSON file.""",
     )
 
     args = arg_parser.parse_args()

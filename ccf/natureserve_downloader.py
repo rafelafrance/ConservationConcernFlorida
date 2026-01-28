@@ -19,7 +19,7 @@ TIMEOUT = 2  # Wait this many seconds for the page to load
 BASE_URL = "https://explorer.natureserve.org"
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     log.started()
 
     args.html_dir.mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def main(args):
     log.finished()
 
 
-def download(path: Path, url: str, retries: int = ERROR_RETRY):
+def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
     if path.exists():
         return
 
@@ -52,7 +52,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
                 browser = playwright.chromium.launch()
                 ctx = browser.new_context(viewport={"width": 1920, "height": 1080})
                 page = ctx.new_page()
-                page.goto(url, wait_until="domcontentloaded")
+                page.goto(url, wait_until="networkidle")  # "domcontentloaded")
 
                 with path.open("w", encoding="utf-8") as f:
                     f.write(page.content())
@@ -66,7 +66,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
 
 
 def get_target_taxa(target_taxa_csv: Path) -> list[str]:
-    with target_taxa_csv.open() as f:
+    with target_taxa_csv.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         targets = {r["parentTaxon"] for r in reader}
     return sorted(targets)
@@ -116,7 +116,7 @@ def compare_targets_and_nature_serve(
     pp(sorted(misses))
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
         description=textwrap.dedent("""Download data from the NatureServe website."""),
     )

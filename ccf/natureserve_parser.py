@@ -11,7 +11,7 @@ from pylib import log
 from tqdm import tqdm
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     log.started()
 
     pages = sorted(args.html_dir.glob("*.html"))
@@ -70,8 +70,8 @@ def sort_columns(df):
 
 
 def get_states():
-    canada_file = Path(__file__).parent / "pylib" / "rules" / "terms" / "canada.csv"
-    usa_file = Path(__file__).parent / "pylib" / "rules" / "terms" / "usa.csv"
+    canada_file = Path(__file__).parent / "rules" / "terms" / "canada.csv"
+    usa_file = Path(__file__).parent / "rules" / "terms" / "usa.csv"
 
     with canada_file.open() as f:
         reader = csv.DictReader(f)
@@ -192,7 +192,7 @@ def find_pairs(soup):
     return pairs
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
         allow_abbrev=True,
         description=textwrap.dedent("Parse data from downloaded HTML files."),
