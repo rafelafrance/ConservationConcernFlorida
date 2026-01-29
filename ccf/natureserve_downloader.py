@@ -79,11 +79,11 @@ def get_nature_serve_taxa(nature_serve_json: Path) -> dict[str, dict]:
     nature_serve = {}
     for item in data:
         nature_serve[item["scientificName"]] = item
-        # species_global = item.get("speciesGlobal", {})
-        # synonyms = species_global.get("synonyms", [])
-        # for syn in synonyms:
-        #     syn = " ".join(syn.split()[:2])
-        #     nature_serve[syn] = item
+        species_global = item.get("speciesGlobal", {})
+        synonyms = species_global.get("synonyms", [])
+        for syn in synonyms:
+            syn = " ".join(syn.split())
+            nature_serve[syn] = item
 
     return nature_serve
 
