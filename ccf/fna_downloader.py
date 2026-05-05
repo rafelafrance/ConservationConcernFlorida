@@ -28,15 +28,17 @@ class Taxon:
     species: str
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.species.replace(" ", "_")
 
     @property
-    def stem(self):
-        return self.family + "_" + self.name
+    def stem(self) -> str:
+        val = f"{self.family}_" if self.family else ""
+        val += self.name
+        return val
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     log.started()
 
     args.html_dir.mkdir(parents=True, exist_ok=True)
@@ -52,7 +54,7 @@ def main(args):
     log.finished()
 
 
-def download(path: Path, url: str, retries: int = ERROR_RETRY):
+def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
     if path.exists():
         return
 
@@ -81,13 +83,15 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY):
 
 
 def get_target_taxa(target_taxa_csv: Path) -> list[Taxon]:
-    with target_taxa_csv.open() as f:
+    with target_taxa_csv.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        targets = [Taxon(r["Family"], r["parentTaxon"]) for r in reader]
+        targets = [
+            Taxon(family=r.get("family", ""), species=r["parentTaxon"]) for r in reader
+        ]
     return targets
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
         description=textwrap.dedent("""Download data from the NatureServe website."""),
     )
@@ -109,7 +113,6 @@ def parse_args():
     )
 
     args = arg_parser.parse_args()
-
     return args
 
 

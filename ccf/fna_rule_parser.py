@@ -12,7 +12,7 @@ import ccf.pylib.fna_parse_treatment as fna
 from ccf.pylib import log
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     log.started()
 
     pages = sorted(args.html_dir.glob("*.html"))
@@ -22,7 +22,7 @@ def main(args):
     records = []
 
     for page in tqdm(pages):
-        # print(page.stem)
+        print(page.stem)
         with page.open() as f:
             text = f.read()
 
@@ -43,7 +43,7 @@ def main(args):
     log.finished()
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
         allow_abbrev=True,
         description=textwrap.dedent("Parse data from downloaded HTML files."),

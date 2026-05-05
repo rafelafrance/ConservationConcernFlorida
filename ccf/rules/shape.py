@@ -1,14 +1,17 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
-from spacy.language import Language
 from spacy.util import registry
 from traiter.pipes import add
 from traiter.pylib import term_util
 from traiter.pylib.pattern_compiler import Compiler
 
 from ccf.rules.base import Base
+
+if TYPE_CHECKING:
+    from spacy.language import Language
+    from spacy.tokens import Span
 
 
 @dataclass(eq=False)
@@ -21,7 +24,7 @@ class Shape(Base):
     shape: str = ""
 
     @classmethod
-    def pipe(cls, nlp: Language):
+    def pipe(cls, nlp: Language) -> None:
         add.term_pipe(nlp, name="shape_terms", path=cls.terms)
         # add.debug_tokens(nlp)  # ##########################################
         add.trait_pipe(
@@ -32,7 +35,7 @@ class Shape(Base):
         add.cleanup_pipe(nlp, name="shape_cleanup")
 
     @classmethod
-    def shape_patterns(cls):
+    def shape_patterns(cls) -> list[Compiler]:
         return [
             Compiler(
                 label="shape",
@@ -47,11 +50,11 @@ class Shape(Base):
         ]
 
     @classmethod
-    def shape_match(cls, ent):
+    def shape_match(cls, ent: Span) -> Shape:
         text = ent.text.lower()
         return cls.from_ent(ent, shape=cls.replace.get(text, text))
 
 
 @registry.misc("shape_match")
-def shape_match(ent):
+def shape_match(ent: Span) -> Shape:
     return Shape.shape_match(ent)

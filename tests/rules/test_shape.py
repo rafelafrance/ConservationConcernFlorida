@@ -5,7 +5,7 @@ from tests.setup import parse
 
 
 class TestShape(unittest.TestCase):
-    def test_shape_01(self):
+    def test_shape_01(self) -> None:
         self.assertEqual(
             parse("""Leaf blades deltate to ± rhombic or ovate,"""),
             [
