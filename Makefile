@@ -3,7 +3,7 @@
 
 install:
 	uv sync
-	uv pip install -e ../../traiter/traiter
+	uv pip install -e ../../traiter
 	uv run -- python -m spacy download en_core_web_md
 
 test:

@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import logging
 import textwrap
 import time
 from pathlib import Path
@@ -24,13 +25,18 @@ def main(args: argparse.Namespace) -> None:
 
     args.html_dir.mkdir(parents=True, exist_ok=True)
 
-    targets = get_target_taxa(args.target_taxa_csv)
     nature_serve = get_nature_serve_taxa(args.nature_serve_json)
+    logging.info(f"There are {len(nature_serve)} nature serve records.")
+
+    targets = get_target_taxa(args.target_taxa_csv)
+    logging.info(f"There are {len(targets)} target taxa.")
+
+    targets = [t for t in targets if t in nature_serve]
+    targets = targets[: args.limit]
+    logging.info(f"There are {len(targets)} overlapping taxa.")
 
     for i, target in enumerate(targets, 1):
         print(i, target)
-        if target not in nature_serve:
-            continue
         record = nature_serve[target]
         path = get_download_file_name(record, args.html_dir)
         url = get_download_url(record)
@@ -52,7 +58,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
                 browser = playwright.chromium.launch()
                 ctx = browser.new_context(viewport={"width": 1920, "height": 1080})
                 page = ctx.new_page()
-                page.goto(url, wait_until="networkidle")  # "domcontentloaded")
+                page.goto(url, wait_until="networkidle")  # domcontentloaded
 
                 with path.open("w", encoding="utf-8") as f:
                     f.write(page.content())
@@ -61,7 +67,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
 
             break
 
-        except (TimeoutError, HTTPError, PwTimeoutError):
+        except TimeoutError, HTTPError, PwTimeoutError:
             time.sleep(attempt * TIMEOUT)
 
 
@@ -143,6 +149,13 @@ def parse_args() -> argparse.Namespace:
         required=True,
         metavar="PATH",
         help="""Save downloaded web pages into this directory.""",
+    )
+
+    arg_parser.add_argument(
+        "--limit",
+        type=int,
+        metavar="INT",
+        help="""Limit to this many downloads. Used for debugging.""",
     )
 
     args = arg_parser.parse_args()

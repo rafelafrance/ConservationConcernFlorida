@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ConcervationConcernFlorida"
-version = "0.0.1"
+version = "0.1.0"
 readme = "README.md"
 description = ""
 license = { file = "LICENSE" }
@@ -13,15 +13,13 @@ requires-python = ">=3.14"
 dependencies = [
     "Jinja2",
     "beautifulsoup4",
-    "dspy",
-    "dspy-ai",
     "ftfy",
-    "jupyterlab>=4.5.1",
+    "jupyterlab",
     "levenshtein",
     "lxml",
     "pandas",
     "pillow",
-    "pip>=26.1.1",
+    "pip",
     "playwright",
     "regex",
     "rich",
@@ -78,6 +76,7 @@ ignore = [
     "FIX002",  # Line contains TODO
     "G004",    # Logging statement uses f-string
     "ISC001",  # Implicitly concatenated string literals on one line
+    "LOG015",  # Do not use root logger (DELETE ME)
     "N818",    # Exception name {name} should be named with an Error suffix
     "PD901",   # Avoid using the generic variable name df for DataFrames
     "PLR0913", # Too many arguments in function definition ({c_args} > {max_args})
