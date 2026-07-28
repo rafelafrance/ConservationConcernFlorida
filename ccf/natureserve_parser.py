@@ -4,9 +4,10 @@ import argparse
 import csv
 import textwrap
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from pylib import log
 from tqdm import tqdm
 
@@ -47,7 +48,7 @@ def main(args: argparse.Namespace) -> None:
     log.finished()
 
 
-def sort_columns(df):
+def sort_columns(df: pd.DataFrame) -> Any:  # pd.DataFrame:
     states = get_states()
 
     others, canada, usa = [], [], []
@@ -69,7 +70,7 @@ def sort_columns(df):
     return df[columns]
 
 
-def get_states():
+def get_states() -> dict:
     canada_file = Path(__file__).parent / "rules" / "terms" / "canada.csv"
     usa_file = Path(__file__).parent / "rules" / "terms" / "usa.csv"
 
@@ -84,7 +85,7 @@ def get_states():
     return states
 
 
-def parse_sections(heading, rec, value):
+def parse_sections(heading: Tag, rec: dict, value: Any) -> dict:
     match heading.text:
         case "Classification":
             classification_section(rec, value)
@@ -101,11 +102,11 @@ def parse_sections(heading, rec, value):
     return rec
 
 
-def ecology_section(rec, value):
+def ecology_section(rec: dict, value: Any) -> None:
     rec |= find_pairs(value)
 
 
-def distribution_section(rec, value):
+def distribution_section(rec: dict, value: Any) -> None:
     pairs = find_pairs(value)
     rec["Endemism"] = pairs.get("Endemism", "")
 
@@ -118,7 +119,7 @@ def distribution_section(rec, value):
         rec[key] = sub_nations
 
 
-def conservation_section(rec, value):
+def conservation_section(rec: dict, value: Any) -> None:
     for sub_sect in value.find_all("div", attrs={"class": "sub-section-1"}):
         heading = sub_sect.find("h3", attrs={"class": "label-div"})
 
@@ -166,7 +167,7 @@ def conservation_section(rec, value):
         rec |= find_pairs(nation)
 
 
-def classification_section(rec, value):
+def classification_section(rec: dict, value: Any) -> None:
     pairs = find_pairs(value)
     rec |= {
         "Scientific Name": pairs["Scientific Name"],
@@ -177,7 +178,7 @@ def classification_section(rec, value):
     }
 
 
-def find_pairs(soup):
+def find_pairs(soup: BeautifulSoup) -> dict:
     pairs = {}
     for pair in soup.find_all("div", attrs={"class": "data-pair"}):
         label = pair.find("div", attrs={"class": "label-div"}).text

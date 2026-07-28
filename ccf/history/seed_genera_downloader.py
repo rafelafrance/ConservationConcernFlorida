@@ -62,7 +62,7 @@ def download_genus(driver, path: Path, genus: str):
 
         print(f"{genus} succeded")
 
-    except (NoSuchElementException, TimeoutException):
+    except NoSuchElementException, TimeoutException:
         print(f"{genus} failed")
 
 

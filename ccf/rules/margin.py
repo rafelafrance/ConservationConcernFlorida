@@ -22,7 +22,10 @@ class Margin(Base):
     margin_csv: ClassVar[Path] = Path(__file__).parent / "terms" / "margin_terms.csv"
     replace: ClassVar[dict[str, str]] = term_util.look_up_table(margin_csv, "replace")
     ent_types: ClassVar[set[str]] = {
-        "margin_term", "shape", "margin_follower", "margin_leader"
+        "margin_term",
+        "shape",
+        "margin_follower",
+        "margin_leader",
     }
     # ---------------------
 

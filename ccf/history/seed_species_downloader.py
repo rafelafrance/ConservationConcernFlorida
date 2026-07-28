@@ -53,7 +53,7 @@ def search(driver, species: str):
 
         driver.find_element(By.TAG_NAME, "h4")
 
-    except (NoSuchElementException, TimeoutException):
+    except NoSuchElementException, TimeoutException:
         return False
 
     return True
@@ -71,7 +71,7 @@ def download_species(driver, url, path: Path, species: str):
 
         print(f"{species} succeded")
 
-    except (NoSuchElementException, TimeoutException):
+    except NoSuchElementException, TimeoutException:
         print(f"{species} failed")
 
     finally:

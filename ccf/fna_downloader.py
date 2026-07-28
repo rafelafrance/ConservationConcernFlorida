@@ -78,7 +78,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
 
             break
 
-        except (TimeoutError, HTTPError, PwTimeoutError):
+        except TimeoutError, HTTPError, PwTimeoutError:
             time.sleep(attempt * TIMEOUT)
 
 

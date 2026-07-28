@@ -7,7 +7,6 @@ import logging
 import textwrap
 import time
 from pathlib import Path
-from pprint import pp
 from urllib.error import HTTPError
 
 from playwright.sync_api import TimeoutError as PwTimeoutError
@@ -21,7 +20,7 @@ BASE_URL = "https://explorer.natureserve.org"
 
 
 def main(args: argparse.Namespace) -> None:
-    log.started()
+    started = log.job_began(args=args)
 
     args.html_dir.mkdir(parents=True, exist_ok=True)
 
@@ -42,7 +41,7 @@ def main(args: argparse.Namespace) -> None:
         url = get_download_url(record)
         download(path, url)
 
-    log.finished()
+    log.job_elapsed(started)
 
 
 def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
@@ -74,7 +73,7 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
 def get_target_taxa(target_taxa_csv: Path) -> list[str]:
     with target_taxa_csv.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        targets = {r["parentTaxon"] for r in reader}
+        targets = {r["Scientific.Name"] for r in reader}
     return sorted(targets)
 
 
@@ -103,23 +102,6 @@ def get_download_file_name(nature_serve_rec: dict, parent: Path) -> Path:
 
 def get_download_url(nature_serve_rec: dict) -> str:
     return f"{BASE_URL}{nature_serve_rec['nsxUrl']}"
-
-
-def compare_targets_and_nature_serve(
-    targets: list[str], nature_serve: dict[str, dict]
-) -> None:
-    hits = 0
-    misses = []
-    for target in targets:
-        hits += 1 if target in nature_serve else 0
-        if target not in nature_serve:
-            misses.append(target)
-
-    print(f"Nature  {len(nature_serve)}")
-    print(f"targets {len(targets)}")
-    print(f"hits    {hits}")
-
-    pp(sorted(misses))
 
 
 def parse_args() -> argparse.Namespace:
