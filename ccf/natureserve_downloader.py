@@ -31,13 +31,18 @@ def main(args: argparse.Namespace) -> None:
     logging.info(f"There are {len(targets)} target taxa.")
 
     targets = [t for t in targets if t in nature_serve]
-    targets = targets[: args.limit]
+    if args.limit:
+        targets = targets[args.offset : args.offset + args.limit]
+
     logging.info(f"There are {len(targets)} overlapping taxa.")
 
     for i, target in enumerate(targets, 1):
-        print(i, target)
         record = nature_serve[target]
         path = get_download_file_name(record, args.html_dir)
+        if path.exists():
+            logging.info(f"{i} {target} EXISTS")
+            continue
+        logging.info(f"{i} {target}")
         url = get_download_url(record)
         download(path, url)
 
@@ -45,12 +50,9 @@ def main(args: argparse.Namespace) -> None:
 
 
 def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
-    if path.exists():
-        return
-
     for attempt in range(1, retries + 1):
         if attempt > 1:
-            print(f"Attempt {attempt}")
+            logging.info(f"ATTEMPT {attempt}")
 
         try:
             with sync_playwright() as playwright:
@@ -73,8 +75,8 @@ def download(path: Path, url: str, retries: int = ERROR_RETRY) -> None:
 def get_target_taxa(target_taxa_csv: Path) -> list[str]:
     with target_taxa_csv.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        targets = {r["Scientific.Name"] for r in reader}
-    return sorted(targets)
+        targets = {r["Scientific Name"] for r in reader}
+    return list(targets)
 
 
 def get_nature_serve_taxa(nature_serve_json: Path) -> dict[str, dict]:
@@ -134,10 +136,18 @@ def parse_args() -> argparse.Namespace:
     )
 
     arg_parser.add_argument(
+        "--offset",
+        type=int,
+        default=0,
+        metavar="INT",
+        help="""Start downloads from this offset.""",
+    )
+
+    arg_parser.add_argument(
         "--limit",
         type=int,
         metavar="INT",
-        help="""Limit to this many downloads. Used for debugging.""",
+        help="""Limit to this many downloads.""",
     )
 
     args = arg_parser.parse_args()
