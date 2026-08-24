@@ -29,25 +29,34 @@ FIELDS = [
     "Short-term Trend Comments",
 ]
 
-COLUMNS = [
-    "Scientific Name",
-    "Order",
-    "Family",
-    "Genus",
-    "NatureServe Unique Identifier",
-    "Global Status",
-    "Global Status (Rounded)",
-] + [
-    column
-    for field in FIELDS
-    for column in (
-        field,
-        f"{field}_status",
-        f"{field}_categories",
-        f"{field}_category_count",
-        f"{field}_mentions",
-    )
-] + ["elapsed"]
+COLUMNS = (
+    [
+        "Scientific Name",
+        "Order",
+        "Family",
+        "Genus",
+        "NatureServe Unique Identifier",
+        "Global Status",
+        "Global Status (Rounded)",
+    ]
+    + [
+        column
+        for field in FIELDS
+        for column in (
+            field,
+            f"{field}_status",
+            f"{field}_categories",
+            f"{field}_category_count",
+            f"{field}_mentions",
+        )
+    ]
+    + [
+        "Summary_categories",
+        "Summary_category_count",
+        "Summary_mentions",
+        "elapsed",
+    ]
+)
 
 CATEGORY_ORDER = [
     "1. Residential & Commercial Development",
@@ -72,7 +81,8 @@ CSV_COLUMNS = [
     "NatureServe Unique Identifier",
     "Global Status",
     "Global Status (Rounded)",
-] + FIELDS
+    *FIELDS,
+]
 
 
 @dataclass
@@ -81,7 +91,7 @@ class ModelArgs:
     json_schema: str = ""
     model_id: str = "Qwen3.8-27B-UD-Q4_K_XL"
     api_host: str = "http://localhost:8080/v1"
-    temperature: float | None = None
+    temperature: float = 0.3
     max_tokens: int | None = None
     reasoning_effort: str = "none"
     timeout: int = 300
@@ -169,16 +179,16 @@ def classify_threats(args: argparse.Namespace) -> None:
 
 
 def load_done(out_csv: Path) -> dict[tuple[str, str], dict]:
-    """Return {(Scientific Name, field): row} from a previous run's output,
-    or an empty dict if the file is missing, empty, or has a different header."""
+    """Return {(Scientific Name, field): row} from a previous run's output."""
     if not out_csv.exists() or out_csv.stat().st_size == 0:
         return {}
     with out_csv.open() as fin:
         reader = csv.DictReader(fin)
         if reader.fieldnames != COLUMNS:
             return {}
+        rows = list(reader)
         return {
-            (row["Scientific Name"], field): row for field in FIELDS for row in reader
+            (row["Scientific Name"], field): row for field in FIELDS for row in rows
         }
 
 
@@ -212,6 +222,31 @@ def make_row(threat: dict, results: dict, began: datetime) -> dict:
         row[f"{field}_categories"] = result["categories"]
         row[f"{field}_category_count"] = result["category_count"]
         row[f"{field}_mentions"] = result["mentions"]
+
+    # Summary across all fields: union of categories (in IUCN order) and
+    # mentions (deduplicated, prefixed with the source field).
+    present = set()
+    for field in FIELDS:
+        if results[field]["status"] != "success":
+            continue
+        present.update(filter(None, results[field]["categories"].split(" | ")))
+    row["Summary_categories"] = " | ".join(
+        c for c in CATEGORY_ORDER if c in present
+    )
+    row["Summary_category_count"] = str(len(present))
+
+    seen = set()
+    summary_mentions = []
+    for field in FIELDS:
+        if results[field]["status"] != "success":
+            continue
+        for mention in filter(None, results[field]["mentions"].split(" | ")):
+            if mention in seen:
+                continue
+            seen.add(mention)
+            summary_mentions.append(f"{field}: {mention}")
+    row["Summary_mentions"] = " | ".join(summary_mentions)
+
     row["elapsed"] = str(log.task_elapsed(began))
     return row
 
@@ -254,22 +289,30 @@ def call_model(
         payload["max_tokens"] = args.max_tokens
 
     extracted = {}
-    try:
-        response = session.post(
-            url, headers=headers, json=payload, timeout=args.timeout
-        )
-        response.raise_for_status()
-        result = response.json()
+    status = "ERROR"
+    for _attempt in range(2):
+        try:
+            response = session.post(
+                url, headers=headers, json=payload, timeout=args.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
 
-        content = result["choices"][0]["message"]["content"] or ""
-        content = content.replace("```json", "").replace("```", "")
-        extracted = json.loads(content)
+            content = result["choices"][0]["message"]["content"] or ""
+            content = content.replace("```json", "").replace("```", "")
+            extracted = json.loads(content)
 
-        status = "success"
+            status = "success"
 
-    except (RequestException, JSONDecodeError, ValueError):
-        logging.exception(f"Parse error for: {threat['Scientific Name']} [{field}]")
-        status = "ERROR"
+        except RequestException, JSONDecodeError, ValueError:
+            logging.exception(f"Parse error for: {threat['Scientific Name']} [{field}]")
+            status = "ERROR"
+            break
+
+        # An all-false verdict on non-empty text is often an intermittent
+        # model miss; retry once before accepting it.
+        if any(isinstance(v, dict) and v.get("present") for v in extracted.values()):
+            break
 
     categories = []
     mentions = []
@@ -336,7 +379,12 @@ def parse_args() -> argparse.Namespace:
         help="""How many parallel threads to run. (default: %(default)s)""",
     )
     arg_parser.add_argument(
-        "--temperature", type=float, metavar="float", help="""Model's temperature."""
+        "--temperature",
+        type=float,
+        default=model_args.temperature,
+        metavar="float",
+        help="""Model's temperature. Low but non-zero so the all-false
+            retry can produce a different answer. (default: %(default)s)""",
     )
     arg_parser.add_argument(
         "--max-tokens",
