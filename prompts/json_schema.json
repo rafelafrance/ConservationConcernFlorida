@@ -1,0 +1,277 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "1. Residential & Commercial Development",
+        "2. Agriculture & Aquaculture",
+        "3. Energy Production & Mining",
+        "4. Transportation & Service Corridors",
+        "5. Biological Resource Use",
+        "6. Human Intrusions & Disturbance",
+        "7. Natural System Modifications",
+        "8. Invasive & Problematic Species and Diseases",
+        "9. Pollution",
+        "10. Geological Events",
+        "11. Climate Change & Severe Weather",
+        "12. Other"
+      ],
+      "properties": {
+        "1. Residential & Commercial Development": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "2. Agriculture & Aquaculture": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "3. Energy Production & Mining": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "4. Transportation & Service Corridors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "5. Biological Resource Use": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "6. Human Intrusions & Disturbance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "7. Natural System Modifications": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "8. Invasive & Problematic Species and Diseases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "9. Pollution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "10. Geological Events": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "11. Climate Change & Severe Weather": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        },
+        "12. Other": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "mentions"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "True if the text describes at least one direct threat in this category, false otherwise."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+            }
+          }
+        }
+      }
+    }
+  }
+}

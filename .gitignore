@@ -46,3 +46,10 @@ pilot/
 scratch/
 old/
 experiments/
+
+# secrets
+*secret*
+.env
+
+# Personal
+.codebook.toml
