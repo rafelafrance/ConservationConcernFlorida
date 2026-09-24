@@ -89,8 +89,8 @@ CSV_COLUMNS = [
 class ModelArgs:
     prompt: str = ""
     json_schema: str = ""
-    model_id: str = "Qwen3.8-27B-UD-Q4_K_XL"
-    api_host: str = "http://localhost:8080/v1"
+    model_id: str = "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:Q4_K_XL"
+    api_host: str = "http://localhost:9931/v1"
     temperature: float = 0.3
     max_tokens: int | None = None
     reasoning_effort: str = "none"
@@ -174,6 +174,7 @@ def classify_threats(args: argparse.Namespace) -> None:
                         writer.writerow(
                             make_row(threats[idx], results[idx], began_at[idx])
                         )
+                        out_file.flush()
 
     log.job_elapsed(job_began)
 
@@ -230,9 +231,7 @@ def make_row(threat: dict, results: dict, began: datetime) -> dict:
         if results[field]["status"] != "success":
             continue
         present.update(filter(None, results[field]["categories"].split(" | ")))
-    row["Summary_categories"] = " | ".join(
-        c for c in CATEGORY_ORDER if c in present
-    )
+    row["Summary_categories"] = " | ".join(c for c in CATEGORY_ORDER if c in present)
     row["Summary_category_count"] = str(len(present))
 
     seen = set()
