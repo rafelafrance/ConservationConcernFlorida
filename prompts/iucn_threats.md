@@ -201,7 +201,6 @@ Rules:
   on its own merits using the rules above.
 - All 12 category keys must appear in the output object.
 - Do **not** invent threats that are not in the text.
-- Do **not** assign the same threat to two categories — pick the single best one.
 - If `present` is false, `mentions` must be an empty array.
 - If `present` is true, `mentions` must contain at least one entry.
 
@@ -248,15 +247,15 @@ from the IUCN guidance:
   Modifications**. Category 7 is reserved for alterations to _natural processes_ (fire
   regime, hydrology, sedimentation), not for the consumptive harvest of biological
   resources.
-- **"Habitat loss", "habitat degradation", "habitat fragmentation"** are _outcomes_, not
+- **"Habitat loss", "habitat degradation", "habitat fragmentation"** are not
   categories — do not emit them as their own mention or force them into an arbitrary
   category. Trace them to the **named underlying driver** and code that driver (e.g.
   "habitat loss from road construction" → 4; "habitat fragmentation from a plantation"
-  → 2; "fragmentation from logging" → 5). Only if the text gives _no_ underlying driver
-  should you pick the single most-supported category, and keep the mention text faithful
-  to what the source actually says.
-- When in doubt between two categories, pick the one that best describes the **direct,
-  proximate cause** of harm to the species/habitat, and note your reasoning.
+  → 2; "fragmentation from logging" → 5). If you cannot determine the ultimate driver, DO NOT GUESS.
+- When in doubt between two categories note them both in the following format:
+  ```
+  Uncertain possible categories: <first undecided category> and <second undecided category>
+  ```
 
 ## Previous Errors to Fix
 
