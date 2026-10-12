@@ -73,6 +73,7 @@ ignore = [
     "D212",    # Multi-line docstring summary should start at the first line
     "DTZ005",  # Pass a `datetime.timezone` object to the `tz` parameter
     "DTZ011",  # datetime.date.today() used
+    "EM102",   # Exception must not use an f-string literal, assign to variable first
     "ERA001",  # Remove commented-out code
     "FIX002",  # Line contains TODO
     "G004",    # Logging statement uses f-string
@@ -98,6 +99,8 @@ ignore = [
     "T201",    # print found
     "TD002",   # Missing author in TODO
     "TD003",   # Missing issue link on the line following this TODO
+    "TRY003",  # Avoid specifying long messages outside the exception class
+    "TRY301",  # Abstract `raise` to an inner function
 ]
 
 [tool.ty.rules]

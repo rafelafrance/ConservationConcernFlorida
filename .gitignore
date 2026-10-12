@@ -46,6 +46,7 @@ pilot/
 scratch/
 old/
 experiments/
+.agents/
 
 # secrets
 *secret*

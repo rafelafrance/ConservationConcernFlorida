@@ -307,17 +307,11 @@ Use this JSON schema to format the output.
         "1. Residential & Commercial Development": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -325,17 +319,11 @@ Use this JSON schema to format the output.
         "2. Agriculture & Aquaculture": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -343,17 +331,11 @@ Use this JSON schema to format the output.
         "3. Energy Production & Mining": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -361,17 +343,11 @@ Use this JSON schema to format the output.
         "4. Transportation & Service Corridors": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -379,17 +355,11 @@ Use this JSON schema to format the output.
         "5. Biological Resource Use": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -397,17 +367,11 @@ Use this JSON schema to format the output.
         "6. Human Intrusions & Disturbance": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -415,17 +379,11 @@ Use this JSON schema to format the output.
         "7. Natural System Modifications": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -433,17 +391,11 @@ Use this JSON schema to format the output.
         "8. Invasive & Problematic Species and Diseases": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -451,17 +403,11 @@ Use this JSON schema to format the output.
         "9. Pollution": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -469,17 +415,11 @@ Use this JSON schema to format the output.
         "10. Geological Events": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -487,17 +427,11 @@ Use this JSON schema to format the output.
         "11. Climate Change & Severe Weather": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
@@ -505,17 +439,11 @@ Use this JSON schema to format the output.
         "12. Other": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["present", "mentions"],
+          "required": ["mentions"],
           "properties": {
-            "present": {
-              "type": "boolean",
-              "description": "True if the text describes at least one direct threat in this category, false otherwise."
-            },
             "mentions": {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
+              "items": { "type": "string" },
               "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
             }
           }
