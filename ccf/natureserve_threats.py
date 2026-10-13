@@ -43,14 +43,7 @@ IN_COLUMNS = [
 # Output columns to args.out_csv
 OUT_COLUMNS = [
     "status",
-    "Scientific Name",
-    "Order",
-    "Family",
-    "Genus",
-    "NatureServe Unique Identifier",
-    "Global Status",
-    "Global Status (Rounded)",
-    *FIELDS,
+    *IN_COLUMNS,
     "threat_status",
     "threat_categories",
     "threat_category_count",
