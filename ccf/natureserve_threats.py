@@ -141,7 +141,11 @@ def classify_threats(args: argparse.Namespace) -> None:
         buff_mode = "a"
         with buff_file.open() as buff_csv:
             reader = csv.DictReader(buff_csv)
-            already_read = {(r["Scientific Name"], r["category"]) for r in reader}
+            already_read = {
+                (r["Scientific Name"], r["category"])
+                for r in reader
+                if r["status"] == "success"
+            }
 
     category_prompts = load_category_prompts(args.prompt_dir)
 
@@ -281,10 +285,10 @@ def call_model(
         content = result["choices"][0]["message"]["content"] or ""
         content = content.replace("```json", "").replace("```", "")
         extracted = json.loads(content)
-        if not (
-            isinstance(extracted, dict) and isinstance(extracted.get("mentions"), list)
-        ):
-            raise TypeError(f"unexpected response shape: {content[:200]}")
+        if not isinstance(extracted, dict):
+            raise TypeError(f"Model did not return a dict: {content}")
+        if not isinstance(extracted.get("mentions"), list):
+            raise TypeError(f"Model did not return a list for mentions: {content}")
 
     except RequestException, JSONDecodeError, ValueError, TypeError:
         logging.exception(f"Parse error for: {sci_name} ({cat.name})")
