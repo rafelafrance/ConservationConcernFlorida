@@ -15,10 +15,10 @@ For the text you are given:
 
 1. Decide whether the text contains **any** direct threat in **Residential & Commercial Development**
    (category 1).
-2. If it does, set `present` to true and record **each distinct** threat in that
+2. If it does, record **each distinct** threat in that
    category as one entry in `mentions`, briefly quoting or paraphrasing the
    supporting text.
-3. If it does not, set `present` to false and leave `mentions` as an empty array.
+3. If it does not, leave `mentions` as an empty array.
 
 **One threat = one mention.** If the same underlying threat is described several
 ways in the text (or supports a classification for multiple reasons), record it
@@ -78,7 +78,7 @@ military bases.
 
 - Dams and water flow changes — even hydropower dams — go under **7. Natural System Modifications**.
 - "Land use change" by itself is not a threat here — trace it to the named underlying driver and code that driver.
-- "Habitat loss", "habitat degradation", and "habitat fragmentation" are not categories — trace them to the named driver (e.g., "habitat loss from road construction" → 4). If you cannot determine the driver, set `present` false; do not guess.
+- "Habitat loss", "habitat degradation", and "habitat fragmentation" are not categories — trace them to the named driver (e.g., "habitat loss from road construction" → 4).
 
 ## Output Format
 
@@ -96,7 +96,7 @@ Use this JSON schema to format the output.
         "mentions": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+          "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text."
         }
       }
     }

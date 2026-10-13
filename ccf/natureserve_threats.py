@@ -59,7 +59,7 @@ OUT_COLUMNS = [
 
 BUFFER_COLUMNS = [
     "status",
-    "sci_name",
+    "Scientific Name",
     "category",
     "mentions",
 ]
@@ -184,16 +184,15 @@ def classify_threats(args: argparse.Namespace) -> None:
                     result = future.result()
                     statuses[result["status"]] += 1
                     cat = result["category"]
-                    writer.writerow(
-                        {
-                            "sci_name": sci_name,
-                            "status": result["status"],
-                            "category": cat,
-                            "mentions": " | ".join(
-                                f"{cat}: {r}" for r in result["mentions"]
-                            ),
-                        }
-                    )
+                    row = {
+                        "Scientific Name": sci_name,
+                        "status": result["status"],
+                        "category": cat,
+                        "mentions": " | ".join(
+                            f"{cat}: {r.strip()}" for r in result["mentions"]
+                        ),
+                    }
+                    writer.writerow(row)
                     buff_fh.flush()
                     pbar.update(1)
 
@@ -208,7 +207,7 @@ def write_results(buff_file: Path, out_csv: Path, in_data: dict) -> None:
     with buff_file.open() as buff_fh:
         reader = csv.DictReader(buff_fh)
         for row in reader:
-            results[row["sci_name"]][row["category"]] = {
+            results[row["Scientific Name"]][row["category"]] = {
                 "status": row["status"],
                 "mentions": row["mentions"],
             }
@@ -224,11 +223,12 @@ def write_results(buff_file: Path, out_csv: Path, in_data: dict) -> None:
             if cat not in result_dict:
                 continue
             result = result_dict[cat]
-            if not result["mentions"]:
+            status &= result["status"] == "success"
+            mention = result["mentions"].strip()
+            if not mention or result["status"] != "success":
                 continue
             categories.append(cat)
-            mentions.append(result["mentions"])
-            status &= result["status"] == "success"
+            mentions.append(mention)
 
         out_row["threat_status"] = "success" if status else "ERROR"
         out_row["threat_categories"] = " | ".join(categories)

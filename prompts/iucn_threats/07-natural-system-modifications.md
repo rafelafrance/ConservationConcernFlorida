@@ -15,10 +15,10 @@ For the text you are given:
 
 1. Decide whether the text contains **any** direct threat in **Natural System Modifications**
    (category 7).
-2. If it does, set `present` to true and record **each distinct** threat in that
+2. If it does, record **each distinct** threat in that
    category as one entry in `mentions`, briefly quoting or paraphrasing the
    supporting text.
-3. If it does not, set `present` to false and leave `mentions` as an empty array.
+3. If it does not, leave `mentions` as an empty array.
 
 **One threat = one mention.** If the same underlying threat is described several
 ways in the text (or supports a classification for multiple reasons), record it
@@ -96,7 +96,7 @@ Use this JSON schema to format the output.
         "mentions": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when present is false."
+          "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text. Must be an empty array when there are not threats."
         }
       }
     }
