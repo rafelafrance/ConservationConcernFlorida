@@ -205,74 +205,40 @@ Rules:
 When a single activity could plausibly fit two categories, apply these rules of thumb
 from the IUCN guidance:
 
-- If people **live** in a development (housing, towns, suburbs, vacation homes), code it
-  under **1. Residential & Commercial Development**, not 4.
-- **Dams** and water flow changes go under **7. Natural System Modifications**, not
-  1 or 3 — even hydropower dams.
-- **Oil spills at the drill site** go under **3. Energy Production & Mining**; oil spills
-  from pipelines or tankers go under **9.2 Industrial & Military Effluents** (or 4 for the
-  transport corridor).
-- **Fire used to clear new agricultural land** goes under **2. Agriculture & Aquaculture**;
-  fire suppression or fires outside their natural range go under **7.1 Fire & Fire Suppression**.
-- **Felling trees to clear agricultural land** goes under **2. Agriculture & Aquaculture**;
-  harvesting standing timber for wood/fibre goes under **5.3 Logging & Wood Harvesting**.
-- **Feral domesticated animals** go under **8.1 Invasive Non-native/Alien Species**;
-  free-roaming livestock that is actively managed as farming goes under **2.3 Livestock**.
-- **Permanent recreational/tourist facilities** (hotels, resorts) go under **1.3 Tourism &
-  Recreation Areas**; casual recreation (hiking, diving, whale watching) goes under **6.1**.
-- **Permanent military bases** go under **1.2 Commercial & Industrial Areas**; war,
-  conflict, and military exercises go under **6.2**.
-- **Landfills** go under **1.2**; toxins leaching from a landfill into groundwater go under
-  **9.2**.
-- **Off-road vehicles** (ATVs, quads, 4x4s, off-road buggies) default to **4. Transportation &
-  Service Corridors**. Reclassify them under **6. Human Intrusions & Disturbance** only when the
-  text explicitly frames them as _recreational/sport_ use (e.g., "recreational
-  off-roading", "ATV trails for sport"). When the context is unclear, prefer **4**.
-- **Grazing or browsing by wild animals** — deer, elk, moose, ravens, gulls, rabbits, rodents,
-  or other free-living (non-farmed) animals that overgraze, over-browse, nest in, or prey upon
-  the taxon — go under **8. Invasive & Problematic Species and Diseases** (the
-  "over-abundant native species" sub-case), NOT **2. Agriculture & Aquaculture** (which is
-  for _managed/farmed_ livestock) and NOT **12. Other**.
-- **Fire frequency / intensity increases** go under **7. Natural System Modifications**
-  (7.1 Fire & Fire Suppression). Do **not** jump to **11. Climate Change & Severe Weather**
-  unless the text _explicitly_ attributes the fire regime change to climate change or a
-  specific climatic driver. The default, when the driver is not named, is **7**, not **11**.
-- **Forestry management / logging / timber harvesting** (commercial or selective felling,
-  clear-cutting, thinning, forest "management", wood/pulp fibre harvest) goes under **5.
-  Biological Resource Use** (5.3 Logging & Wood Harvesting), NOT **7. Natural System
-  Modifications**. Category 7 is reserved for alterations to _natural processes_ (fire
-  regime, hydrology, sedimentation), not for the consumptive harvest of biological
-  resources.
-- **"Habitat loss", "habitat degradation", "habitat fragmentation"** are not
-  categories — do not emit them as their own mention or force them into an arbitrary
-  category. Trace them to the **named underlying driver** and code that driver (e.g.
-  "habitat loss from road construction" → 4; "habitat fragmentation from a plantation"
-  → 2; "fragmentation from logging" → 5). If you cannot determine the ultimate driver, DO NOT GUESS.
-- When in doubt between two categories note them both in the following format:
-  ```
-  Uncertain possible categories: <first undecided category> and <second undecided category>
-  ```
+- If people **live** in a development (housing, towns, suburbs, vacation homes), code it under **1. Residential & Commercial Development**, not 4.
+- **Dams** and water flow changes go under **7. Natural System Modifications**, not 1 or 3 — even hydropower dams.
+- **Oil spills at the drill site** go under **3. Energy Production & Mining**; oil spills from pipelines or tankers go under **9.2 Industrial & Military Effluents** (or 4 for the transport corridor).
+- **Fire used to clear new agricultural land** goes under **2. Agriculture & Aquaculture**; fire suppression or fires outside their natural range go under **7.1 Fire & Fire Suppression**.
+- **Felling trees to clear agricultural land** goes under **2. Agriculture & Aquaculture**; harvesting standing timber for wood/fibre goes under **5.3 Logging & Wood Harvesting**.
+- **Feral domesticated animals** go under **8.1 Invasive Non-native/Alien Species**; free-roaming livestock that is actively managed as farming goes under **2.3 Livestock**.
+- **Permanent recreational/tourist facilities** (hotels, resorts) go under **1.3 Tourism & Recreation Areas**; casual recreation (hiking, diving, whale watching) goes under **6.1**.
+- **Permanent military bases** go under **1.2 Commercial & Industrial Areas**; war, conflict, and military exercises go under **6.2**.
+- **Landfills** go under **1.2**; toxins leaching from a landfill into groundwater go under **9.2**.
+- **Off-road vehicles** (ATVs, quads, 4x4s, off-road buggies) default to **4. Transportation & Service Corridors**. Reclassify them under **6. Human Intrusions & Disturbance** only when the text explicitly frames them as _recreational/sport_ use (e.g., "recreational off-roading", "ATV trails for sport"). When the context is unclear, prefer **4**.
+- **Grazing or browsing by wild animals** — deer, elk, moose, ravens, gulls, rabbits, rodents, or other free-living (non-farmed) animals that overgraze, over-browse, nest in, or prey upon the taxon — go under **8. Invasive & Problematic Species and Diseases** (the "over-abundant native species" sub-case), NOT **2. Agriculture & Aquaculture** (which is for _managed/farmed_ livestock) and NOT **12. Other**.
+- **Fire frequency / intensity increases** go under **7. Natural System Modifications** (7.1 Fire & Fire Suppression). Do **not** jump to **11. Climate Change & Severe Weather** unless the text _explicitly_ attributes the fire regime change to climate change or a specific climatic driver. The default, when the driver is not named, is **7**, not **11**.
+- **Forestry management / logging / timber harvesting** (commercial or selective felling, clear-cutting, thinning, forest "management", wood/pulp fibre harvest) goes under **5. Biological Resource Use** (5.3 Logging & Wood Harvesting), NOT **7. Natural System Modifications**. Category 7 is reserved for alterations to _natural processes_ (fire regime, hydrology, sedimentation), not for the consumptive harvest of biological resources.
+- **"Habitat loss", "habitat degradation", "habitat fragmentation"** are not categories — do not emit them as their own mention or force them into an arbitrary category. Trace them to the **named underlying driver** and code that driver (e.g. "habitat loss from road construction" → 4; "habitat fragmentation from a plantation" → 2; "fragmentation from logging" → 5).
+- **Wildfires and fire** should be classified as 11 Climate Change & Severe Weather NOT Natural System Modifications.
+- **Herbicides and argicultural run-off** should be classified as cat 9 Pollution NOT 2 Agriculture & Aquaculture.
+- **Siliviculture** should be classified as cat 2 Agriculture & Aquaculture NOT 5 Biological Resource Use.
+- **Logging** should be classified as cat 5 Biological Resource Use NOT 12 other.
+- **Livestock** should be classified as cat 2 Agriculture & Aquaculture NOT 12 other.
+- **Powerlines/Power lines** should be classified as cat 4 Transportation & Service Corridors.
+- **Hydropower** should be classified as cat 7 Natural System Modifications.
+- **Habitat alteration** should NOT be classified as cat 7 Natural System Modifications.
+- **Land use change** should NOT be classified as 1 Development.
+- **Hybridisation/hybridization** should be classified as 8 Invasive & Problematic Species and Diseases.
+- **Mowing** should be classified as 7 Natural System Modifications.
+- **Insect predation** should be classified as 8 Invasive & Problematic Species and Diseases.
+- **Ibex** should be classified as 8 Invasive & Problematic Species and Diseases.
+- **Plantations** should be classified as 2 Agriculture & Aquaculture.
+- **Clearing of land** should NOT be classified as 7 Natural System Modifications.
+- **Occasional logging-associated trampling** should be classified as 5 Biological Resource Use.
+- **Herbivory** should be classified as 8 Invasive & Problematic Species and Diseases NOT 2 Agriculture & Aquaculture.
+- **Past threat** is NOT a category.
 
-## Previous Errors to Fix
-
-- Wildfires and fire should be classified as 11 Climate Change & Severe Weather NOT Natural System Modifications.
-- Past threat is NOT a category.
-- Herbicides and argicultural run-off should be classified as cat 9 Pollution NOT 2 Agriculture & Aquaculture.
-- Siliviculture should be classified as cat 2 Agriculture & Aquaculture NOT 5 Biological Resource Use.
-- Logging should be classified as cat 5 Biological Resource Use NOT 12 other.
-- Livestock should be classified as cat 2 Agriculture & Aquaculture NOT 12 other.
-- Powerlines should be classified as cat 4 Transportation & Service Corridors.
-- Hydropower should be classified as cat 7 Natural System Modifications.
-- Habitat alteration should NOT be classified as cat 7 Natural System Modifications.
-- Land use change should NOT be classified as 1 Development.
-- Hybridisation/hybridization should be classified as 8 Invasive & Problematic Species and Diseases.
-- Mowing should be classified as 7 Natural System Modifications.
-- Insect predation should be classified as 8 Invasive & Problematic Species and Diseases.
-- Ibex should be classified as 8 Invasive & Problematic Species and Diseases.
-- Plantations should be classified as 2 Agriculture & Aquaculture.
-- Clearing of land should NOT be classified as 7 Natural System Modifications.
-- Occasional logging-associated trampling should be classified as 5 Biological Resource Use.
-- Herbivory should be classified as 8 Invasive & Problematic Species and Diseases NOT 2 Agriculture & Aquaculture.
+If you cannot determine the ultimate driver, DO NOT GUESS.
 
 ## Output Format
 

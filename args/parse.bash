@@ -9,7 +9,6 @@ export GGML_CUDA_ENABLE_UNIFIED_MEMORY=ON
     --spec-type draft-mtp \
     --spec-draft-n-max 3 \
     --ctx-size 262144 \
-    --image-min-tokens 1024 \
     --parallel 4 \
     --temp 0.7 \
     --top-k 20 \
@@ -21,5 +20,3 @@ export GGML_CUDA_ENABLE_UNIFIED_MEMORY=ON
 
     # --models-preset preset.ini \
     # --hf-repo unsloth/Qwen3.6-35B-A3B-MTP-GGUF:Q4_K_XL
-
-

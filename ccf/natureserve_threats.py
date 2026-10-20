@@ -48,6 +48,17 @@ OUT_COLUMNS = [
     "threat_categories",
     "threat_category_count",
     "threat_mentions",
+    "threat_categories_revised",
+    "threat_category_count_revised",
+    "threat_mentions_revised",
+    "grazing_flag",
+    "ORVs_flag",
+    "trampling_flag",
+    "trail_flag",
+    "succession_flag",
+    "erosion_flag",
+    "fire_flag",
+    "target",
 ]
 
 BUFFER_COLUMNS = [
@@ -72,9 +83,29 @@ CATEGORY_ORDER = [
     "12. Other",
 ]
 
+FLAGS = {
+    "erode": "erosion_flag",
+    "eroded": "erosion_flag",
+    "erosion": "erosion_flag",
+    "fire": "fire_flag",
+    "fires": "fire_flag",
+    "wildfire": "fire_flag",
+    "wildfires": "fire_flag",
+    "graze": "grazing_flag",
+    "grazed": "grazing_flag",
+    "grazing": "grazing_flag",
+    "orv": "ORVs_flag",
+    "orvs": "ORVs_flag",
+    "succession": "succession_flag",
+    "trail": "trail_flag",
+    "trample": "trampling_flag",
+    "trampled": "trampling_flag",
+    "trampling": "trampling_flag",
+}
+
 
 @dataclass
-class CategoryPrompt:
+class Prompt:
     name: str
     prompt: str
     json_schema: str
@@ -82,53 +113,70 @@ class CategoryPrompt:
 
 @dataclass
 class ModelArgs:
-    model_id: str = "unsloth/Qwen3.8-27B-GGUF"
+    model_id: str = "unsloth/Qwen3.8-27B-UD-Q8_K_XL"
     api_host: str = "http://localhost:9931/v1"
     timeout: int = 300
     threads: int = 1
 
 
-def load_category_prompts(prompt_dir: Path) -> list[CategoryPrompt]:
-    if not prompt_dir.is_dir():
-        raise SystemExit(f"Prompt directory not found: {prompt_dir}")
-    prompts = []
-    for path in sorted(prompt_dir.glob("*.md")):
-        text = path.read_text()
-        front = re.match(r"^---\n(.*?)\n---\n", text, flags=re.DOTALL)
-        if not front:
-            raise SystemExit(f"{path}: missing frontmatter")
-        cat = re.search(r"^category:\s*(.+?)\s*$", front.group(1), flags=re.MULTILINE)
-        if not cat:
-            raise SystemExit(f"{path}: missing 'category' frontmatter field")
-        name = cat.group(1).strip().strip('"')
-        body = re.sub(r"^---$.*^---$", "", text, flags=re.MULTILINE | re.DOTALL).strip()
-        schema = re.search(r"```json(.+)```", body, flags=re.DOTALL)
-        if not schema:
-            raise SystemExit(f"{path}: missing json schema block")
-        prompts.append(CategoryPrompt(name, body, schema.group(1).strip()))
-    names = [p.name for p in prompts]
-    missing = [n for n in CATEGORY_ORDER if n not in names]
-    extra = [n for n in names if n not in CATEGORY_ORDER]
-    if missing:
-        raise SystemExit(f"{prompt_dir}: missing category prompts: {missing}")
-    if extra:
-        raise SystemExit(f"{prompt_dir}: unexpected category prompts: {extra}")
-    return prompts
-
-
 def classify_threats(args: argparse.Namespace) -> None:
     job_began = log.job_began(args.log_file, args=args)
 
-    in_data = pd.read_csv(args.in_csv, dtype=str, usecols=IN_COLUMNS)
+    in_data = read_in_data(args.in_csv, args.limit)
+
+    buff_file = args.out_csv.with_stem(args.out_csv.stem + "_buffer")
+
+    model_args = ModelArgs(
+        model_id=args.model_id,
+        api_host=args.api_host,
+        timeout=args.timeout,
+        threads=args.threads,
+    )
+
+    # already_read, buff_mode = get_already_read(buff_file)
+
+    # write_buffer(
+    #     model_args,
+    #     in_data,
+    #     buff_file,
+    #     buff_mode,
+    #     already_read,
+    #     args.threads,
+    #     args.prompt_dir,
+    # )
+
+    out_rows = get_results(buff_file, in_data)
+    set_flags(out_rows)
+
+    revise_results(out_rows, model_args, args.prompt_path, args.threads)
+
+    # df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
+    # df.to_csv(args.out_csv, index=False)
+
+    log.job_elapsed(job_began)
+
+
+def read_in_data(in_csv: Path, limit: int | None) -> dict[str, dict]:
+    in_data = pd.read_csv(in_csv, dtype=str, usecols=IN_COLUMNS)
     in_data = in_data.fillna("").to_dict("records")
     in_data = [t for t in in_data if t.get("Scientific Name")]
-    in_data = in_data[: args.limit]
+    in_data = in_data[:limit]
     for row in in_data:
         row["target"] = "\n\n".join([t for f in FIELDS if (t := row.get(f))]) or ""
     in_data = {t["Scientific Name"]: t for t in in_data}
+    return in_data
 
-    buff_file = args.out_csv.with_stem(args.out_csv.stem + "_buffer")
-    already_read = {}
+
+def set_flags(in_data: dict) -> None:
+    for row in in_data:
+        words = set(row["target"].lower().split())
+        for problem, flag in FLAGS.items():
+            if problem in words:
+                row[flag] = "1"
+
+
+def get_already_read(buff_file: Path) -> tuple:
+    already_read = set()
     buff_mode = "w"
     if buff_file.exists():
         buff_mode = "a"
@@ -139,17 +187,21 @@ def classify_threats(args: argparse.Namespace) -> None:
                 for r in reader
                 if r["status"] == "success"
             }
+    return already_read, buff_mode
 
-    category_prompts = load_category_prompts(args.prompt_dir)
+
+def write_buffer(
+    model_args: ModelArgs,
+    in_data: dict,
+    buff_file: Path,
+    buff_mode: str,
+    already_read: set,
+    threads: int,
+    prompt_dir: Path,
+) -> None:
+    category_prompts = load_category_prompts(prompt_dir)
 
     statuses = defaultdict(int)
-
-    model_args = ModelArgs(
-        model_id=args.model_id,
-        api_host=args.api_host,
-        timeout=args.timeout,
-        threads=args.threads,
-    )
 
     with buff_file.open(buff_mode) as buff_fh:
         writer = csv.DictWriter(buff_fh, BUFFER_COLUMNS)
@@ -157,7 +209,7 @@ def classify_threats(args: argparse.Namespace) -> None:
             writer.writeheader()
 
         with (
-            ThreadPoolExecutor(max_workers=args.threads) as executor,
+            ThreadPoolExecutor(max_workers=threads) as executor,
             requests.Session() as session,
         ):
             futures = {}
@@ -166,7 +218,7 @@ def classify_threats(args: argparse.Namespace) -> None:
                     if not row["target"] or (sci_name, cat.name) in already_read:
                         continue
                     future = executor.submit(
-                        call_model,
+                        call_per_threat_model,
                         model_args,
                         sci_name,
                         cat,
@@ -193,13 +245,26 @@ def classify_threats(args: argparse.Namespace) -> None:
                     buff_fh.flush()
                     pbar.update(1)
 
-    write_results(buff_file, args.out_csv, in_data)
-
     logging.info(f"There were {statuses['ERROR']} errors")
-    log.job_elapsed(job_began)
 
 
-def write_results(buff_file: Path, out_csv: Path, in_data: dict) -> None:
+def load_category_prompts(prompt_dir: Path) -> list[Prompt]:
+    prompts = [load_prompt(path) for path in sorted(prompt_dir.glob("*.md"))]
+    return prompts
+
+
+def load_prompt(prompt_path: Path) -> Prompt:
+    text = prompt_path.read_text()
+    front = re.match(r"^---\n(.*?)\n---\n", text, flags=re.DOTALL)
+    cat = re.search(r"^category:\s*(.+?)\s*$", front.group(1), flags=re.MULTILINE)
+    name = cat.group(1).strip().strip('"')
+    body = re.sub(r"^---$.*^---$", "", text, flags=re.MULTILINE | re.DOTALL).strip()
+    schema = re.search(r"```json(.+)```", body, flags=re.DOTALL)
+    prompt = Prompt(name, body, schema.group(1).strip())
+    return prompt
+
+
+def get_results(buff_file: Path, in_data: dict) -> list[dict]:
     results = defaultdict(dict)
     with buff_file.open() as buff_fh:
         reader = csv.DictReader(buff_fh)
@@ -233,14 +298,96 @@ def write_results(buff_file: Path, out_csv: Path, in_data: dict) -> None:
         out_row["threat_mentions"] = " | ".join(mentions)
         out_rows.append(out_row)
 
-    df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
-    df.to_csv(out_csv, index=False)
+    return out_rows
 
 
-def call_model(
+def revise_results(
+    out_rows: list[dict],
+    model_args: ModelArgs,
+    prompt_path: Path,
+    threads: int,
+) -> None:
+    # return fuzz.partial_ratio(expect, actual) / 100.0
+    prompt = load_prompt(prompt_path)
+
+    with (
+        ThreadPoolExecutor(max_workers=threads) as executor,
+        requests.Session() as session,
+        tqdm(len(out_rows)) as pbar,
+    ):
+        for row in out_rows:
+            mentions = row["threat_mentions"].split(" | ")
+            for mention in mentions:
+                print(f"{mention=}")
+                match = re.search(
+                    r"^(\d+)\.\s*([^:]+?)\s*:\s*(.+)\s*$",
+                    mention,
+                    flags=re.DOTALL | re.MULTILINE,
+                )
+                if not match:
+                    continue
+                threat_id, threat_cat, threat = match.groups()
+                print(f"{threat_id=}")
+                print(f"{threat_cat=}")
+                print(f"{threat=}")
+                result = call_revise_threat_model(
+                    model_args, row["Scientific Name"], prompt, threat, session
+                )
+                # print(f"{result=}")
+                print()
+            import sys
+
+            sys.exit()
+
+
+def call_revise_threat_model(
     args: ModelArgs,
     sci_name: str,
-    cat: CategoryPrompt,
+    prompt: Prompt,
+    mention: str,
+    session: requests.Session,
+) -> int:
+    url = f"{args.api_host}/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {os.getenv('LLM_API_KEY')}",
+    }
+    payload = {
+        "model": args.model_id,
+        "messages": [
+            {"role": "system", "content": prompt.prompt},
+            {
+                "role": "user",
+                "content": f"Classify the threat category of this text:\n\n{mention}",
+            },
+        ],
+        "chat_template_kwargs": {"enable_thinking": False},
+        "response_format": prompt.json_schema,
+    }
+
+    category = 0
+    try:
+        response = session.post(
+            url, headers=headers, json=payload, timeout=args.timeout
+        )
+        response.raise_for_status()
+        result = response.json()
+
+        content = result["choices"][0]["message"]["content"] or "0"
+        content = content.replace("```json", "").replace("```", "")
+        # category = int(content)
+        print(f"{content}")
+
+    except RequestException, JSONDecodeError, ValueError, TypeError:
+        logging.exception(f"Parse error for: {sci_name} ({mention})")
+
+    return category
+
+
+def call_per_threat_model(
+    args: ModelArgs,
+    sci_name: str,
+    cat: Prompt,
     threats: str,
     session: requests.Session,
 ) -> dict:
@@ -261,8 +408,8 @@ def call_model(
                 ),
             },
         ],
+        "chat_template_kwargs": {"enable_thinking": False},
         "response_format": cat.json_schema,
-        "enable_thinking": False,
     }
 
     extracted = {}
@@ -322,6 +469,13 @@ def parse_args() -> argparse.Namespace:
         metavar="path",
         help="""A directory of per-category prompt markdown files.
         (default: %(default)s)""",
+    )
+    arg_parser.add_argument(
+        "--prompt-path",
+        type=Path,
+        default=Path("prompts/iucn_threats_revised.md"),
+        metavar="path",
+        help="""A prompt used to revise threat categories. (default: %(default)s)""",
     )
     arg_parser.add_argument(
         "--model-id",
