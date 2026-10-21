@@ -181,9 +181,10 @@ Rules:
   the same category — do not let one classification influence the next. Evaluate each text
   on its own merits using the rules above.
 - **Do not** show any thinking.
-- **Do not** describe what you see in the image.
+- **Do not** describe what you see.
 - **Do not** add any introductory or concluding remarks.
 - **Do not** invent threats that are not in the text.
+- **Do not** invent threats that are not in this prompt.
 
 ## How to handle ambiguous / overlapping cases
 
