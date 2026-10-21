@@ -169,11 +169,11 @@ def read_in_data(in_csv: Path, limit: int | None) -> dict[str, dict]:
 
 
 def set_flags(in_data: dict) -> None:
+    targets = set(FLAGS.keys())
     for row in in_data:
         words = set(row["target"].lower().split())
-        for problem, flag in FLAGS.items():
-            if problem in words:
-                row[flag] = "1"
+        for flag in words & targets:
+            row[FLAGS[flag]] = "1"
 
 
 def get_already_read(buff_file: Path) -> tuple:
