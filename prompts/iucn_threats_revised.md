@@ -180,8 +180,10 @@ Rules:
   exact same rules to each one independently. Identical wording in two texts must produce
   the same category — do not let one classification influence the next. Evaluate each text
   on its own merits using the rules above.
-- All 12 category keys must appear in the output object.
-- Do **not** invent threats that are not in the text.
+- **Do not** show any thinking.
+- **Do not** describe what you see in the image.
+- **Do not** add any introductory or concluding remarks.
+- **Do not** invent threats that are not in the text.
 
 ## How to handle ambiguous / overlapping cases
 

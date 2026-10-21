@@ -28,12 +28,7 @@ dependencies = [
     "spacy",
     "tqdm",
 ]
-optional-dependencies.dev = [
-    "build",
-    "ruff",
-    "ruff-lsp",
-    "jupyter",
-]
+optional-dependencies.dev = ["build", "ruff", "ruff-lsp", "jupyter"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -102,6 +97,7 @@ ignore = [
     "TD003",   # Missing issue link on the line following this TODO
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY301",  # Abstract `raise` to an inner function
+    "TRY400",  # Use `logging.exception` instead of `logging.error`
 ]
 
 [tool.ty.rules]

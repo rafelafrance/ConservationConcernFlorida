@@ -51,6 +51,7 @@ OUT_COLUMNS = [
     "threat_categories_revised",
     "threat_category_count_revised",
     "threat_mentions_revised",
+    "threat_category_changed",
     "grazing_flag",
     "ORVs_flag",
     "trampling_flag",
@@ -68,7 +69,7 @@ BUFFER_COLUMNS = [
     "mentions",
 ]
 
-CATEGORY_ORDER = [
+CATEGORIES = [
     "1. Residential & Commercial Development",
     "2. Agriculture & Aquaculture",
     "3. Energy Production & Mining",
@@ -133,25 +134,25 @@ def classify_threats(args: argparse.Namespace) -> None:
         threads=args.threads,
     )
 
-    # already_read, buff_mode = get_already_read(buff_file)
+    already_read, buff_mode = get_already_read(buff_file)
 
-    # write_buffer(
-    #     model_args,
-    #     in_data,
-    #     buff_file,
-    #     buff_mode,
-    #     already_read,
-    #     args.threads,
-    #     args.prompt_dir,
-    # )
+    write_buffer(
+        model_args,
+        in_data,
+        buff_file,
+        buff_mode,
+        already_read,
+        args.threads,
+        args.prompt_dir,
+    )
 
     out_rows = get_results(buff_file, in_data)
     set_flags(out_rows)
 
     revise_results(out_rows, model_args, args.prompt_path, args.threads)
 
-    # df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
-    # df.to_csv(args.out_csv, index=False)
+    df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
+    df.to_csv(args.out_csv, index=False)
 
     log.job_elapsed(job_began)
 
@@ -248,6 +249,51 @@ def write_buffer(
     logging.info(f"There were {statuses['ERROR']} errors")
 
 
+def revise_results(
+    out_rows: list[dict],
+    model_args: ModelArgs,
+    prompt_path: Path,
+    threads: int,
+) -> None:
+    # return fuzz.partial_ratio(expect, actual) / 100.0
+    prompt = load_prompt(prompt_path)
+
+    with requests.Session() as session:
+        for row in tqdm(out_rows):
+            mentions = row["threat_mentions"].split(" | ")
+            new_categories = set()
+            new_mentions = []
+            changed = []
+            for mention in mentions:
+                match = re.search(
+                    r"^(\d+)\.\s*([^:]+?)\s*:\s*(.+)\s*$",
+                    mention,
+                    flags=re.DOTALL | re.MULTILINE,
+                )
+                if not match:
+                    continue
+                threat_id, threat_name, threat = match.groups()
+                category_id = call_revise_threat_model(
+                    model_args, row["Scientific Name"], prompt, threat, session
+                )
+                if not category_id or not isinstance(category_id, (int, float)):
+                    new_categories.add(f"{threat_id}. {threat_name}")
+                    new_mentions.append((int(threat_id), mention))
+                else:
+                    category_id = int(category_id)
+                    category = CATEGORIES[category_id - 1]
+                    new_categories.add(category)
+                    new_mentions.append((category_id, f"{category}: {threat}"))
+                    if int(threat_id) != category_id:
+                        changed.append(f"{threat_id} -> {category}: {threat}")
+
+            row["threat_categories_revised"] = " | ".join(sorted(new_categories))
+            row["threat_category_count_revised"] = str(len(new_categories))
+            new_mentions = [m[1] for m in sorted(new_mentions)]
+            row["threat_mentions_revised"] = new_mentions
+            row["threat_category_changed"] = " | ".join(changed)
+
+
 def load_category_prompts(prompt_dir: Path) -> list[Prompt]:
     prompts = [load_prompt(path) for path in sorted(prompt_dir.glob("*.md"))]
     return prompts
@@ -281,13 +327,13 @@ def get_results(buff_file: Path, in_data: dict) -> list[dict]:
         status = True
         categories = []
         mentions = []
-        for cat in CATEGORY_ORDER:
+        for cat in CATEGORIES:
             if cat not in result_dict:
                 continue
             result = result_dict[cat]
             status &= result["status"] == "success"
             mention = result["mentions"].strip()
-            if not mention or result["status"] != "success":
+            if not mention or result.get("status") != "success":
                 continue
             categories.append(cat)
             mentions.append(mention)
@@ -299,45 +345,6 @@ def get_results(buff_file: Path, in_data: dict) -> list[dict]:
         out_rows.append(out_row)
 
     return out_rows
-
-
-def revise_results(
-    out_rows: list[dict],
-    model_args: ModelArgs,
-    prompt_path: Path,
-    threads: int,
-) -> None:
-    # return fuzz.partial_ratio(expect, actual) / 100.0
-    prompt = load_prompt(prompt_path)
-
-    with (
-        ThreadPoolExecutor(max_workers=threads) as executor,
-        requests.Session() as session,
-        tqdm(len(out_rows)) as pbar,
-    ):
-        for row in out_rows:
-            mentions = row["threat_mentions"].split(" | ")
-            for mention in mentions:
-                print(f"{mention=}")
-                match = re.search(
-                    r"^(\d+)\.\s*([^:]+?)\s*:\s*(.+)\s*$",
-                    mention,
-                    flags=re.DOTALL | re.MULTILINE,
-                )
-                if not match:
-                    continue
-                threat_id, threat_cat, threat = match.groups()
-                print(f"{threat_id=}")
-                print(f"{threat_cat=}")
-                print(f"{threat=}")
-                result = call_revise_threat_model(
-                    model_args, row["Scientific Name"], prompt, threat, session
-                )
-                # print(f"{result=}")
-                print()
-            import sys
-
-            sys.exit()
 
 
 def call_revise_threat_model(
@@ -361,7 +368,7 @@ def call_revise_threat_model(
                 "content": f"Classify the threat category of this text:\n\n{mention}",
             },
         ],
-        "chat_template_kwargs": {"enable_thinking": False},
+        "reasoning": False,
         "response_format": prompt.json_schema,
     }
 
@@ -373,13 +380,14 @@ def call_revise_threat_model(
         response.raise_for_status()
         result = response.json()
 
-        content = result["choices"][0]["message"]["content"] or "0"
+        content = result["choices"][0]["message"]["content"] or ""
         content = content.replace("```json", "").replace("```", "")
-        # category = int(content)
-        print(f"{content}")
+        if content:
+            extracted = json.loads(content)
+            category = extracted.get("category", 0)
 
     except RequestException, JSONDecodeError, ValueError, TypeError:
-        logging.exception(f"Parse error for: {sci_name} ({mention})")
+        logging.exception(f"Parse error for {sci_name} ({mention})")
 
     return category
 
@@ -408,12 +416,13 @@ def call_per_threat_model(
                 ),
             },
         ],
-        "chat_template_kwargs": {"enable_thinking": False},
+        "reasoning": False,
         "response_format": cat.json_schema,
     }
 
-    extracted = {}
     status = "success"
+    extracted = {}
+    mentions = []
 
     try:
         response = session.post(
@@ -425,19 +434,18 @@ def call_per_threat_model(
         content = result["choices"][0]["message"]["content"] or ""
         content = content.replace("```json", "").replace("```", "")
         extracted = json.loads(content)
-        if not isinstance(extracted, dict):
-            raise TypeError(f"Model did not return a dict: {content}")
-        if not isinstance(extracted.get("mentions"), list):
-            raise TypeError(f"Model did not return a list for mentions: {content}")
+
+        mentions = extracted.get("mentions")
+        mentions = mentions if isinstance(mentions, list) else []
 
     except RequestException, JSONDecodeError, ValueError, TypeError:
-        logging.exception(f"Parse error for: {sci_name} ({cat.name})")
+        logging.exception(f"Parse error for {sci_name} ({cat.name})")
         status = "ERROR"
 
     return {
         "category": cat.name,
         "status": status,
-        "mentions": extracted.get("mentions") or [],
+        "mentions": mentions,
     }
 
 
