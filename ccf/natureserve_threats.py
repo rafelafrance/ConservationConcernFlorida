@@ -109,12 +109,12 @@ FLAGS = {
 class Prompt:
     name: str
     prompt: str
-    json_schema: str
+    json_schema: object
 
 
 @dataclass
 class ModelArgs:
-    model_id: str = "unsloth/Qwen3.8-27B-UD-Q8_K_XL"
+    model_id: str = "unsloth-UD-IQ4_XS"
     api_host: str = "http://localhost:9931/v1"
     timeout: int = 300
     threads: int = 1
@@ -152,6 +152,7 @@ def classify_threats(args: argparse.Namespace) -> None:
     revise_results(out_rows, model_args, args.prompt_path, args.threads)
 
     df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
+    df["target"] = None
     df.to_csv(args.out_csv, index=False)
 
     log.job_elapsed(job_began)
@@ -255,7 +256,6 @@ def revise_results(
     prompt_path: Path,
     threads: int,
 ) -> None:
-    # return fuzz.partial_ratio(expect, actual) / 100.0
     prompt = load_prompt(prompt_path)
 
     with requests.Session() as session:
@@ -306,7 +306,7 @@ def load_prompt(prompt_path: Path) -> Prompt:
     name = cat.group(1).strip().strip('"')
     body = re.sub(r"^---$.*^---$", "", text, flags=re.MULTILINE | re.DOTALL).strip()
     schema = re.search(r"```json(.+)```", body, flags=re.DOTALL)
-    prompt = Prompt(name, body, schema.group(1).strip())
+    prompt = Prompt(name, body, json.loads(schema.group(1).strip()))
     return prompt
 
 
@@ -368,7 +368,7 @@ def call_revise_threat_model(
                 "content": f"Classify the threat category of this text:\n\n{mention}",
             },
         ],
-        "reasoning": False,
+        # "reasoning": False,
         "response_format": prompt.json_schema,
     }
 
@@ -416,7 +416,7 @@ def call_per_threat_model(
                 ),
             },
         ],
-        "reasoning": False,
+        # "reasoning": False,
         "response_format": cat.json_schema,
     }
 

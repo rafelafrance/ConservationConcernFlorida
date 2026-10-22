@@ -88,16 +88,17 @@ Use this JSON schema to format the output.
 {
   "type": "json_schema",
   "json_schema": {
+    "name": "category_01",
     "schema": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mentions"],
       "properties": {
         "mentions": {
           "type": "array",
           "items": { "type": "string" },
           "description": "One entry per distinct threat in this category, briefly quoting or paraphrasing the text."
-        }
+        },
+        "required": ["mentions"]
       }
     }
   }

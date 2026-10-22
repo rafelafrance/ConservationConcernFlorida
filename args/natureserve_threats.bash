@@ -8,7 +8,7 @@ uv run ccf/natureserve_threats.py \
     --prompt-dir prompts/iucn_threats \
     --model-id "unsloth/Qwen3.6-35B-A3B-MTP-GGUF" \
     --threads 4 \
-    --limit 2000 \
+    --limit 1 \
     --log-file data/threats/nature_serve_threats.log
 
     # --out-csv data/threats/threats_nature_serve_"$stamp".csv \

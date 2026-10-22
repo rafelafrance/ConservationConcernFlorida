@@ -84,6 +84,7 @@ Use this JSON schema to format the output.
 {
   "type": "json_schema",
   "json_schema": {
+    "name": "category_04",
     "schema": {
       "type": "object",
       "additionalProperties": false,

@@ -234,13 +234,15 @@ Use this JSON schema to format the output.
 {
   "type": "json_schema",
   "json_schema": {
+    "name": "revise_threat",
+    "strict": true,
     "schema": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["category"],
       "properties": {
         "category": { "type": "integer" }
-      }
+      },
+      "required": ["category"]
     }
   }
 }
