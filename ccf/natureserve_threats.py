@@ -120,6 +120,11 @@ class ModelArgs:
     threads: int = 1
 
 
+MENTION_RE = re.compile(
+    r"^(\d+)\.\s*([^:]+?)\s*:\s*(.+)\s*$", flags=re.DOTALL | re.MULTILINE
+)
+
+
 def classify_threats(args: argparse.Namespace) -> None:
     job_began = log.job_began(args.log_file, args=args)
 
@@ -149,11 +154,7 @@ def classify_threats(args: argparse.Namespace) -> None:
     out_rows = get_results(buff_file, in_data)
     set_flags(out_rows)
 
-    revise_results(out_rows, model_args, args.prompt_path, args.threads)
-
-    df = pd.DataFrame(out_rows, columns=OUT_COLUMNS, dtype=str)
-    df["target"] = None
-    df.to_csv(args.out_csv, index=False)
+    revise_results(args.out_csv, out_rows, model_args, args.prompt_path, args.threads)
 
     log.job_elapsed(job_began)
 
@@ -251,6 +252,7 @@ def write_buffer(
 
 
 def revise_results(
+    out_csv: Path,
     out_rows: list[dict],
     model_args: ModelArgs,
     prompt_path: Path,
@@ -258,21 +260,27 @@ def revise_results(
 ) -> None:
     prompt = load_prompt(prompt_path)
 
-    with requests.Session() as session:
+    already_revised, revised_mode = get_already_revised(out_csv)
+
+    with out_csv.open(revised_mode) as out_fh, requests.Session() as session:
+        writer = csv.DictWriter(out_fh, OUT_COLUMNS)
+        if revised_mode == "w":
+            writer.writeheader()
+
         for row in tqdm(out_rows):
             mentions = row["threat_mentions"].split(" | ")
             new_categories = set()
             new_mentions = []
             changed = []
             for mention in mentions:
-                match = re.search(
-                    r"^(\d+)\.\s*([^:]+?)\s*:\s*(.+)\s*$",
-                    mention,
-                    flags=re.DOTALL | re.MULTILINE,
-                )
+                match = MENTION_RE.search(mention)
                 if not match:
                     continue
+
                 threat_id, threat_name, threat = match.groups()
+                if (row["Scientific Name"], threat) in already_revised:
+                    continue
+
                 category_id = call_revise_threat_model(
                     model_args, row["Scientific Name"], prompt, threat, session
                 )
@@ -290,8 +298,28 @@ def revise_results(
             row["threat_categories_revised"] = " | ".join(sorted(new_categories))
             row["threat_category_count_revised"] = str(len(new_categories))
             new_mentions = [m[1] for m in sorted(new_mentions)]
-            row["threat_mentions_revised"] = new_mentions
+            row["threat_mentions_revised"] = " | ".join(new_mentions)
             row["threat_category_changed"] = " | ".join(changed)
+            writer.writerow(row)
+            out_fh.flush()
+
+
+def get_already_revised(out_csv: Path) -> tuple:
+    already_revised = set()
+    revised_mode = "w"
+    if out_csv.exists():
+        revised_mode = "a"
+        with out_csv.open() as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                mentions = row["threat_mentions"].split(" | ")
+                for mention in mentions:
+                    match = MENTION_RE.search(mention)
+                    if not mention:
+                        continue
+                    *_, threat = match.groups()
+                    already_revised.add((row["Scientific Name"], threat))
+    return already_revised, revised_mode
 
 
 def load_category_prompts(prompt_dir: Path) -> list[Prompt]:
