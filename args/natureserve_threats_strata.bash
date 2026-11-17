@@ -5,8 +5,9 @@ stamp=$(date +%y%m%d)
 uv run ccf/natureserve_threats.py \
     --api-host http://localhost:8080/v1 \
     --in-csv data/threats/nature_serve_26q3a.csv \
-    --out-csv data/threats/threats_nature_serve_261022.csv \
-    --prompt-dir prompts/iucn_threats \
+    --out-csv data/threats/threats_nature_serve_"$stamp".csv \
+    --threat-prompt prompts/iucn_threats.md \
+    --revise-prompt prompts/iucn_threats_revised.md \
     --threads 4 \
     --limit 2000 \
     --log-file data/threats/nature_serve_threats.log

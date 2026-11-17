@@ -69,7 +69,6 @@ flight paths, jets impacting birds.
 **DO count here:**
 
 - Power lines go here.
-- Off-road vehicles (ATVs, quads, 4x4s, off-road buggies) default here. Move them under **6** only when the text explicitly frames them as recreational/sport use (e.g., "recreational off-roading", "ATV trails for sport"); when the context is unclear, keep them here.
 - Oil spills from pipelines can go here when the text frames the pipeline as a transport corridor (otherwise 9).
 
 **Do NOT count here** (it belongs to another category):
