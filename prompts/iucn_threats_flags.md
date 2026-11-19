@@ -18,131 +18,53 @@ For the text you are given:
 
 ## The 7 Flag Categories
 
-### 1. ORVs_flag
+### 1. orv_flag
 
-Flag any mention of off-road vehicles. This include but are not limited to phrases like:
-
-- "all terrain vehicle"
-- "all terrain vehicles"
-- "all-terrain vehicle"
-- "all-terrain vehicles"
-- "atv"
-- "atv use"
-- "atvs"
-- "motorized recreation"
-- "off highway vehicle"
-- "off highway vehicle use"
-- "off highway vehicle uses"
-- "off highway vehicles"
-- "off road"
-- "off road buggies"
-- "off road recreational vehicle"
-- "off road recreational vehicles"
-- "off road vehicle"
-- "off road vehicles"
-- "off road vehicular use"
-- "off road vehicular uses"
-- "off roading"
-- "off-highway vehicle"
-- "off-highway vehicle use"
-- "off-highway vehicle uses"
-- "off-highway vehicles"
-- "off-road"
-- "off-road buggies"
-- "off-road recreational vehicle"
-- "off-road recreational vehicles"
-- "off-road vehicle"
-- "off-road vehicles"
-- "off-road vehicular use"
-- "off-road vehicular uses"
-- "off-roading"
-- "orv"
-- "orvs"
-- "recreation vehicle"
-- "recreational vehicles"
+Flag any mention of off-road vehicles. Examples include:
+all terrain vehicle, all terrain vehicles, all-terrain vehicle, all-terrain vehicles,
+atv, atv use, atvs, motorized recreation, off highway vehicle, off highway vehicle use,
+off highway vehicle uses, off highway vehicles, off road, off road buggies,
+off road recreational vehicle, off road recreational vehicles, off road vehicle,
+off road vehicles, off road vehicular use, off road vehicular uses, off roading,
+off-highway vehicle, off-highway vehicle use, off-highway vehicle uses, off-highway vehicles,
+off-road, off-road buggies, off-road recreational vehicle, off-road recreational vehicles,
+off-road vehicle, off-road vehicles, off-road vehicular use, off-road vehicular uses,
+off-roading, orv, orvs, recreation vehicle, recreational vehicles.
 
 ### 2. erosion_flag
 
-Flag any mention of erosion. These include but are not limited to phrases like:
-
-- "coastal erosion"
-- "erode"
-- "eroded"
-- "erosion"
-- "erosion bluffs"
-- "soil erosion"
+Flag any mention of erosion. Examples include:
+coastal erosion, erode, eroded, erosion, erosion bluffs, soil erosion.
 
 ### 3. fire_flag
 
-Flag any mention of fire. These include but are not limited to phrases like:
-
-- "accidentally set fire"
-- "accidentally set fires"
-- "fire"
-- "fires"
-- "human ignited fire"
-- "human ignited fires"
-- "human-ignited fires"
-- "lack of fire"
-- "mega fire"
-- "mega fires"
-- "mega-fire"
-- "mega-fires"
-- "megafire"
-- "megafires"
-- "prescribed fire"
-- "prescribed fires"
-- "set fires"
-- "wildfire"
-- "wildfires"
+Flag any mention of fire. Examples include:
+accidentally set fire, accidentally set fires, fire, fires, human ignited fire,
+human ignited fires, human-ignited fires, lack of fire, mega fire, mega fires, mega-fire,
+mega-fires, megafire, megafires, prescribed fire, prescribed fires, set fires,
+wildfire, wildfires.
 
 ### 4. grazing_flag
 
-Flag any mention of grazing. These include but are not limited to phrases like:
-
-- "cattle graze"
-- "cattle grazing"
-- "graze"
-- "grazed"
-- "grazing"
-- "grazing pressure"
-- "livestock grazed"
-- "livestock grazing"
-- "overgraze"
-- "overgrazed"
-- "overgrazing"
+Flag any mention of grazing. Examples include:
+cattle graze, cattle grazing, graze, grazed, grazing, grazing pressure, livestock grazed,
+livestock grazing, overgraze, overgrazed, overgrazing.
 
 ### 5. succession_flag
 
-Flag any mention of succession. These include but are not limited to phrases like:
-
-- "dune succession"
-- "forest succession"
-- "habitat succession"
-- "succession"
-- "successive"
+Flag any mention of succession. Examples include:
+dune succession, forest succession, habitat succession, succession, successive.
 
 ### 6. trail_flag
 
-Flag any mention of trails. These include but are not limited to phrases like:
-
-- "motorized trail"
-- "motorized trails"
-- "trail"
-- "trails"
+Flag any mention of trails. Examples include:
+motorized trail, motorized trails, trail, trails.
 
 ### 7. trampling_flag
 
-Flag any mention of trampling. These include but are not limited to phrases like:
-
-- "burro trampling"
-- "cattle trampling"
-- "grazing/trampling"
-- "horse trampling"
-- "trample"
-- "trampled"
-- "trampling"
-- "trampling/grazing"
+Flag any mention of trampling. Examples include:
+burro trampling, cattle trampling, grazing/trampling, horse trampling, trample,
+trampled, trampling, trampling/grazing.
 
 ## Output Format
 
@@ -166,7 +88,7 @@ Use this JSON schema to format the output.
         "7. Natural System Modifications"
       ],
       "properties": {
-        "1. ORVs_flag": {
+        "1. orv_flag": {
           "type": "object",
           "additionalProperties": false,
           "required": ["mentions"],

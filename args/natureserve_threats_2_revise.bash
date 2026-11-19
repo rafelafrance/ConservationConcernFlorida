@@ -2,14 +2,12 @@
 
 stamp=$(date +%y%m%d)
 
-uv run ccf/natureserve_threats.py \
-    --api-host http://localhost:8080/v1 \
+uv run ccf/natureserve_threats_2_revise.py \
     --in-csv data/threats/nature_serve_26q3a.csv \
-    --out-csv data/threats/threats_nature_serve_"$stamp".csv \
-    --threat-prompt prompts/iucn_threats.md \
-    --revise-prompt prompts/iucn_threats_revised.md \
+    --threat-csv data/threats/threats_nature_serve_1a_261117_gemma.csv \
+    --out-csv data/threats/threats_nature_serve_2_"$stamp"_gemma.csv \
+    --prompt prompts/iucn_threats_revised.md \
     --threads 4 \
-    --limit 2000 \
     --log-file data/threats/nature_serve_threats.log
 
     # --out-csv data/threats/threats_nature_serve_"$stamp".csv \

@@ -25,6 +25,13 @@ IN_COLUMNS = [
     *FIELDS,
 ]
 
+BUFFER_COLUMNS = [
+    "status",
+    "Scientific Name",
+    "category",
+    "mentions",
+]
+
 # Output columns to args.out_csv
 OUT_COLUMNS = [
     "status",
@@ -37,21 +44,7 @@ OUT_COLUMNS = [
     "threat_category_count_revised",
     "threat_mentions_revised",
     "threat_category_changed",
-    "grazing_flag",
-    "ORVs_flag",
-    "trampling_flag",
-    "trail_flag",
-    "succession_flag",
-    "erosion_flag",
-    "fire_flag",
     "target",
-]
-
-BUFFER_COLUMNS = [
-    "status",
-    "Scientific Name",
-    "category",
-    "mentions",
 ]
 
 CATEGORIES = [
@@ -72,13 +65,13 @@ CATEGORIES = [
 FLAGS = {
     "accidentally set fire": "fire_flag",
     "accidentally set fires": "fire_flag",
-    "all terrain vehicle": "ORVs_flag",
-    "all terrain vehicles": "ORVs_flag",
-    "all-terrain vehicle": "ORVs_flag",
-    "all-terrain vehicles": "ORVs_flag",
-    "atv use": "ORVs_flag",
-    "atv": "ORVs_flag",
-    "atvs": "ORVs_flag",
+    "all terrain vehicle": "orv_flag",
+    "all terrain vehicles": "orv_flag",
+    "all-terrain vehicle": "orv_flag",
+    "all-terrain vehicles": "orv_flag",
+    "atv use": "orv_flag",
+    "atv": "orv_flag",
+    "atvs": "orv_flag",
     "burro trampling": "trampling_flag",
     "cattle graze": "grazing_flag",
     "cattle grazing": "grazing_flag",
@@ -111,44 +104,44 @@ FLAGS = {
     "mega-fires": "fire_flag",
     "megafire": "fire_flag",
     "megafires": "fire_flag",
-    "motorized recreation": "ORVs_flag",
+    "motorized recreation": "orv_flag",
     "motorized trail": "trail_flag",
     "motorized trails": "trail_flag",
-    "off highway vehicle use": "ORVs_flag",
-    "off highway vehicle uses": "ORVs_flag",
-    "off highway vehicle": "ORVs_flag",
-    "off highway vehicles": "ORVs_flag",
-    "off road buggies": "ORVs_flag",
-    "off road recreational vehicle": "ORVs_flag",
-    "off road recreational vehicles": "ORVs_flag",
-    "off road vehicle": "ORVs_flag",
-    "off road vehicles": "ORVs_flag",
-    "off road vehicular use": "ORVs_flag",
-    "off road vehicular uses": "ORVs_flag",
-    "off road": "ORVs_flag",
-    "off roading": "ORVs_flag",
-    "off-highway vehicle use": "ORVs_flag",
-    "off-highway vehicle uses": "ORVs_flag",
-    "off-highway vehicle": "ORVs_flag",
-    "off-highway vehicles": "ORVs_flag",
-    "off-road buggies": "ORVs_flag",
-    "off-road recreational vehicle": "ORVs_flag",
-    "off-road recreational vehicles": "ORVs_flag",
-    "off-road vehicle": "ORVs_flag",
-    "off-road vehicles": "ORVs_flag",
-    "off-road vehicular use": "ORVs_flag",
-    "off-road vehicular uses": "ORVs_flag",
-    "off-road": "ORVs_flag",
-    "off-roading": "ORVs_flag",
-    "orv": "ORVs_flag",
-    "orvs": "ORVs_flag",
+    "off highway vehicle use": "orv_flag",
+    "off highway vehicle uses": "orv_flag",
+    "off highway vehicle": "orv_flag",
+    "off highway vehicles": "orv_flag",
+    "off road buggies": "orv_flag",
+    "off road recreational vehicle": "orv_flag",
+    "off road recreational vehicles": "orv_flag",
+    "off road vehicle": "orv_flag",
+    "off road vehicles": "orv_flag",
+    "off road vehicular use": "orv_flag",
+    "off road vehicular uses": "orv_flag",
+    "off road": "orv_flag",
+    "off roading": "orv_flag",
+    "off-highway vehicle use": "orv_flag",
+    "off-highway vehicle uses": "orv_flag",
+    "off-highway vehicle": "orv_flag",
+    "off-highway vehicles": "orv_flag",
+    "off-road buggies": "orv_flag",
+    "off-road recreational vehicle": "orv_flag",
+    "off-road recreational vehicles": "orv_flag",
+    "off-road vehicle": "orv_flag",
+    "off-road vehicles": "orv_flag",
+    "off-road vehicular use": "orv_flag",
+    "off-road vehicular uses": "orv_flag",
+    "off-road": "orv_flag",
+    "off-roading": "orv_flag",
+    "orv": "orv_flag",
+    "orvs": "orv_flag",
     "overgraze": "grazing_flag",
     "overgrazed": "grazing_flag",
     "overgrazing": "grazing_flag",
     "prescribed fire": "fire_flag",
     "prescribed fires": "fire_flag",
-    "recreation vehicle": "ORVs_flag",
-    "recreational vehicles": "ORVs_flag",
+    "recreation vehicle": "orv_flag",
+    "recreational vehicles": "orv_flag",
     "set fires": "fire_flag",
     "soil erosion": "erosion_flag",
     "succession": "succession_flag",
@@ -184,11 +177,3 @@ def load_prompt(prompt_path: Path) -> Prompt:
     schema = re.search(r"```json(.+)```", body, flags=re.DOTALL)
     prompt = Prompt(name, body, json.loads(schema.group(1).strip()))
     return prompt
-
-
-def set_flags(in_data: dict) -> None:
-    targets = set(FLAGS.keys())
-    for row in in_data:
-        words = set(row["target"].lower().split())
-        for flag in words & targets:
-            row[FLAGS[flag]] = "1"

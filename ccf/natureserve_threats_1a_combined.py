@@ -23,7 +23,7 @@ from ccf.pylib import natureserve_threats as nt
 
 @dataclass
 class ModelArgs:
-    model_id: str = "unsloth/Qwen3.6-35B-A3B-MTP-GGUF"
+    model_id: str = "unsloth/gemma-4-31B-it-GGUF"
     api_host: str = "http://localhost:9931/v1"
     timeout: int = 300
     threads: int = 4
@@ -34,10 +34,19 @@ def classify_threats(args: argparse.Namespace) -> None:
     job_began = log.job_began(args.log_file, args=args)
 
     in_data = pd.read_csv(args.in_csv, dtype=str, usecols=nt.IN_COLUMNS)
-    # TODO: Filter out records that were already done
     in_data = in_data.fillna("").to_dict("records")
     in_data = [t for t in in_data if t.get("Scientific Name")]
     in_data = in_data[: args.limit]
+    out_mode = "w"
+    already_read = set()
+    if args.out_csv.exists():
+        with args.out_csv.open() as fh:
+            reader = csv.DictReader(fh)
+            already_read = {
+                r["Scientific Name"] for r in reader if r.get("status") == "success"
+            }
+        in_data = [r for r in in_data if r["Scientific Name"] not in already_read]
+        out_mode = "a"
     for threat in in_data:
         threat["target"] = (
             "\n\n".join([t for f in nt.FIELDS if (t := threat.get(f))]) or ""
@@ -54,8 +63,6 @@ def classify_threats(args: argparse.Namespace) -> None:
     )
 
     prompt = nt.load_prompt(args.prompt)
-
-    out_mode = "w"  # TODO: Append if the file already has data
 
     with args.out_csv.open(out_mode) as out_fh:
         writer = csv.DictWriter(out_fh, nt.BUFFER_COLUMNS)

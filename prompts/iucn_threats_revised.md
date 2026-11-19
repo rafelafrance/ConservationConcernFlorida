@@ -16,7 +16,7 @@ For the text you are given:
 2. Assign the threat to **exactly one** of the 12 major categories below (by number and name).
 3. You will only assign the threat number an integer from 1 to 12 use a 0 if the text does not fit into any of the 12 threat categories.
 
-## What counts as a "direct threat"
+## What counts as a direct threat
 
 A direct threat is a proximate human activity or process that has impacted, is impacting,
 or may impact the status of the taxon or habitat being discussed. It can be **past,
@@ -64,7 +64,10 @@ smallholder and agro-industry farming, teak/eucalyptus/loblolly pine plantations
 Christmas tree farms, wood and pulp plantations, cattle feed lots, chicken farms, dairy
 farms, cattle ranching, goat/camel/yak herding, nomadic and smallholder/agro-industry
 grazing, shrimp or fin-fish aquaculture, fish ponds, hatchery fish, seeded shellfish
-beds, artificial algal beds, mangrove destruction for aquaculture.
+beds, artificial algal beds, mangrove destruction for aquaculture, cattle graze,
+cattle grazing, graze, grazed, grazing, grazing pressure, livestock grazed,
+livestock grazing, overgraze, overgrazed, overgrazing, burro trampling, cattle trampling,
+grazing/trampling, horse trampling, trampling/grazing.
 
 ### 3. Energy Production & Mining
 
@@ -83,7 +86,16 @@ human settlements — including associated wildlife mortality and fragmentation.
 causeways, road kill, fencing along roads, freight/passenger/mining railroads, electrical
 and phone wires, aqueducts, oil and gas pipelines, electrocution of wildlife, canals,
 shipping lanes, ships striking whales, wakes from cargo ships, dredging in waterways,
-flight paths, jets impacting birds.
+flight paths, jets impacting birds, all terrain vehicle, all terrain vehicles, all-terrain vehicle,
+all-terrain vehicles, atv, atv use, atvs, motorized recreation, off highway vehicle,
+off highway vehicle use, off highway vehicle uses, off highway vehicles, off road, off road buggies,
+off road recreational vehicle, off road recreational vehicles, off road vehicle, off road vehicles,
+off road vehicular use, off road vehicular uses, off roading, off-highway vehicle,
+off-highway vehicle use, off-highway vehicle uses, off-highway vehicles, off-road,
+off-road buggies, off-road recreational vehicle, off-road recreational vehicles,
+off-road vehicle, off-road vehicles, off-road vehicular use, off-road vehicular uses, off-roading,
+orv, orvs, recreation vehicle, recreational vehicles, motorized trail, motorized trails,
+trail, trails.
 
 ### 5. Biological Resource Use
 
@@ -108,7 +120,8 @@ ultralight planes, dive boats, whale watching, mountain biking, hikers, cross-co
 skiers, hang-gliders, birdwatchers, scuba divers, pets brought into recreation areas,
 temporary campsites, caving, rock climbing, armed conflict, mine fields, tanks and
 military vehicles, military training exercises and ranges, defoliation, munitions
-testing, law enforcement, drug smugglers, species research, vandalism.
+testing, law enforcement, drug smugglers, species research, vandalism, trample,
+trampled, trampling.
 
 ### 7. Natural System Modifications
 
@@ -120,7 +133,10 @@ agricultural fires, arson, campfires, fires set for hunting), fire suppression (
 homes, inappropriate fire management), changes in water flow (dams of all sizes, surface
 and groundwater abstraction/pumping, wetland filling, levees and dikes, surface water
 diversion, channelization, ditching, artificial lakes, change in salt regime, sediment
-control), and other ecosystem modifications.
+control), and other ecosystem modifications, accidentally set fire, accidentally set fires,
+fire, fires, human ignited fire, human ignited fires, human-ignited fires, lack of fire, mega fire,
+mega fires, mega-fire, mega-fires, megafire, megafires, prescribed fire, prescribed fires,
+set fires, wildfire, wildfires.
 
 ### 8. Invasive & Problematic Species and Diseases
 
@@ -147,7 +163,8 @@ illegal chemical dumping, ship waste discharge, nutrient loading from fertiliser
 manure from feedlots, aquaculture nutrients, soil erosion and sedimentation from
 overgrazing, herbicide/pesticide runoff, municipal waste, litter from cars, flotsam and
 jetsam, flotsam and debris entangling wildlife, municipal and other solid waste,
-discharge of heavy metals and other pollutants.
+discharge of heavy metals and other pollutants, coastal erosion, erode, eroded, erosion,
+erosion bluffs, soil erosion.
 
 ### 10. Geological Events
 
@@ -164,13 +181,6 @@ and severe lack of rain, loss of surface water sources, heat waves, cold spells,
 oceanic temperature changes, disappearance of glaciers and sea ice, thunderstorms,
 tropical storms, hurricanes, cyclones, tornadoes, hailstorms, ice storms and blizzards,
 dust storms, beach erosion during storms, habitat shifting and alteration.
-
-### 12. Other
-
-Threats that do not fit any of the above — new or emerging threats not captured by
-categories 1–11.
-**Examples:** any specific threat that cannot be reasonably assigned to categories 1–11;
-the text should specify what the threat is.
 
 ---
 
